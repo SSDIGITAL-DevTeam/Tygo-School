@@ -29,3 +29,7 @@ pnpm-debug.log*
 
 # vercel
 .vercel
+
+node_modules
+.next
+dist
