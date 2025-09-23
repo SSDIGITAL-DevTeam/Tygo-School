@@ -1,5 +1,5 @@
 # dependencies
-/node_modules
+node_modules
 /.pnp
 .pnp.js
 
@@ -33,3 +33,4 @@ pnpm-debug.log*
 node_modules
 .next
 dist
+out
