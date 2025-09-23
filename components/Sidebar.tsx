@@ -19,6 +19,14 @@ type SidebarProps = {
   active?: Label;
 };
 
+type ChildItem = { label: string; href: string };
+
+type MenuItem = {
+  label: Label;
+  href?: string;
+  children?: ChildItem[];
+};
+
 // Reusable Sidebar with fixed width and optional active item
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
   const purple = "#6c2bd9";
@@ -32,27 +40,36 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
     ? "Students Data"
     : pathname?.startsWith("/role-access")
     ? "Role & Access"
+    : pathname?.startsWith("/master-data")
+    ? "Master Data"
     : "Dashboard";
   const activeLabel: Label = active ?? autoActive;
 
   // Role & Access accordion open state (default open when in /role-access/*)
-  const defaultOpenRole = useMemo(() => (pathname?.startsWith("/role-access") ? true : false), [pathname]);
+  const defaultOpenRole = useMemo(
+    () => (pathname?.startsWith("/role-access") ? true : false),
+    [pathname]
+  );
   const [roleOpen, setRoleOpen] = useState<boolean>(defaultOpenRole);
 
-  const menuItems: Array<
-    | { label: Label; href?: string }
-    | { label: "Master Data"; children: string[]; href?: string }
-  > = [
+  const menuItems: MenuItem[] = [
     { label: "Dashboard", href: "/dashboard" },
     {
       label: "Master Data",
-      children: ["Subjects", "Teachers", "Students Report Format", "Classes"],
+      children: [
+        { label: "Subjects", href: "/master-data/subjects" },
+        { label: "Teachers", href: "/master-data/teachers-management/teacherList" },
+        {
+          label: "Students Report Format",
+          href: "/master-data/students-report-format",
+        },
+        { label: "Classes", href: "/master-data/classes" },
+      ],
     },
     { label: "Students Data", href: "/students" },
-    // Role & Access uses accordion; child links are below
-    { label: "Role & Access" },
-    { label: "Tuition Fee Management" },
-    { label: "School Settings" },
+    { label: "Role & Access" }, // accordion khusus di bawah sudah OK
+    { label: "Tuition Fee Management", href: "/tuition" },
+    { label: "School Settings", href: "/settings" },
   ];
 
   return (
@@ -60,7 +77,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
       {/* Mobile overlay */}
       <div
         className={`fixed inset-0 bg-black/30 z-20 md:hidden transition-opacity ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          isOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
       />
@@ -75,7 +94,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
       >
         {/* Header: Logo + School name */}
         <div className="flex items-center gap-3 p-4 border-b border-gray-200">
-          <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-white font-bold">CB</div>
+          <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-white font-bold">
+            CB
+          </div>
           <div className="font-semibold text-gray-800">Citra Budaya School</div>
         </div>
 
@@ -99,11 +120,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
                       >
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4" />
-                          <span className={pathname?.startsWith("/role-access") ? "font-semibold" : "font-medium"}>
+                          <span
+                            className={
+                              pathname?.startsWith("/role-access")
+                                ? "font-semibold"
+                                : "font-medium"
+                            }
+                          >
                             Role &amp; Access
                           </span>
                         </div>
-                        <ChevronDown className={`w-4 h-4 transition-transform ${roleOpen ? "rotate-180" : "rotate-0"}`} />
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform ${
+                            roleOpen ? "rotate-180" : "rotate-0"
+                          }`}
+                        />
                       </button>
                       {roleOpen && (
                         <ul className="mt-1 space-y-1">
@@ -111,7 +142,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
                             <Link
                               href="/role-access/role-management"
                               className={`block pl-8 pr-3 py-2 rounded-md ${
-                                pathname?.startsWith("/role-access/role-management")
+                                pathname?.startsWith(
+                                  "/role-access/role-management"
+                                )
                                   ? "bg-violet-700 text-white"
                                   : "text-slate-700 hover:bg-slate-100"
                               }`}
@@ -125,7 +158,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
                             <Link
                               href="/role-access/admin-list"
                               className={`block pl-8 pr-3 py-2 rounded-md ${
-                                pathname?.startsWith("/role-access/admin-list") ? "bg-violet-700 text-white" : "text-slate-700 hover:bg-slate-100"
+                                pathname?.startsWith("/role-access/admin-list")
+                                  ? "bg-violet-700 text-white"
+                                  : "text-slate-700 hover:bg-slate-100"
                               }`}
                               onClick={onClose}
                               aria-label="Admin List"
@@ -141,39 +176,69 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
                       href={item.href}
                       onClick={onClose}
                       className={`block px-3 py-2 rounded-md transition-colors ${
-                        isActive ? "bg-[#6c2bd9] text-white shadow-sm" : "text-gray-700 hover:bg-white/60"
+                        isActive
+                          ? "bg-[#6c2bd9] text-white shadow-sm"
+                          : "text-gray-700 hover:bg-white/60"
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <span
                           className="inline-block w-2.5 h-2.5 rounded-sm"
-                          style={{ backgroundColor: isActive ? "#fff" : "#CBD5E1" }}
+                          style={{
+                            backgroundColor: isActive ? "#fff" : "#CBD5E1",
+                          }}
                         />
-                        <span className={isActive ? "font-semibold" : "font-medium"}>{item.label}</span>
+                        <span
+                          className={isActive ? "font-semibold" : "font-medium"}
+                        >
+                          {item.label}
+                        </span>
                       </div>
                     </Link>
                   ) : (
                     <button
                       className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                        isActive ? "bg-[#6c2bd9] text-white shadow-sm" : "text-gray-700 hover:bg-white/60"
+                        isActive
+                          ? "bg-[#6c2bd9] text-white shadow-sm"
+                          : "text-gray-700 hover:bg-white/60"
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <span
                           className="inline-block w-2.5 h-2.5 rounded-sm"
-                          style={{ backgroundColor: isActive ? "#fff" : "#CBD5E1" }}
+                          style={{
+                            backgroundColor: isActive ? "#fff" : "#CBD5E1",
+                          }}
                         />
-                        <span className={isActive ? "font-semibold" : "font-medium"}>{item.label}</span>
+                        <span
+                          className={isActive ? "font-semibold" : "font-medium"}
+                        >
+                          {item.label}
+                        </span>
                       </div>
                     </button>
                   )}
-                  {"children" in item && item.children && (item as any).label !== "Role & Access" && (
+                  {item.children && item.label !== "Role & Access" && (
                     <ul className="mt-1 ml-7 space-y-1">
-                      {item.children.map((sub) => (
-                        <li key={sub}>
-                          <button className="text-sm text-gray-600 hover:text-gray-800 px-2 py-1">{sub}</button>
-                        </li>
-                      ))}
+                      {item.children.map((sub) => {
+                        const subActive = pathname?.startsWith(sub.href);
+                        return (
+                          <li key={sub.label}>
+                            <Link
+                              href={sub.href}
+                              onClick={onClose}
+                              className={`block text-sm px-2 py-1 rounded-md transition-colors ${
+                                subActive
+                                  ? "bg-violet-700 text-white"
+                                  : "text-gray-600 hover:text-gray-800 hover:bg-white/60"
+                              }`}
+                              aria-label={sub.label}
+                            >
+                              {sub.label}
+                            </Link>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </li>
@@ -200,11 +265,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
               }
             }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-5 h-5"
+            >
               <path d="M12 2.25a.75.75 0 0 1 .75.75v8a.75.75 0 0 1-1.5 0v-8A.75.75 0 0 1 12 2.25Z" />
-              <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0 8.25 8.25 0 1 1 11.66 11.66.75.75 0 1 1-1.06-1.06A6.75 6.75 0 1 0 6.53 6.53a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M5.47 5.47a.75.75 0 0 1 1.06 0 8.25 8.25 0 1 1 11.66 11.66.75.75 0 1 1-1.06-1.06A6.75 6.75 0 1 0 6.53 6.53a.75.75 0 0 1 0-1.06Z"
+                clipRule="evenodd"
+              />
             </svg>
-            <span className="font-semibold">{loggingOut ? "Logging Out..." : "Log Out"}</span>
+            <span className="font-semibold">
+              {loggingOut ? "Logging Out..." : "Log Out"}
+            </span>
           </button>
         </div>
       </aside>
