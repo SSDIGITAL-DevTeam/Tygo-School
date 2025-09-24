@@ -39,7 +39,6 @@ const Topbar: React.FC<TopbarProps> = ({ onToggleSidebar, offset = true }) => {
           >
             <option>English</option>
             <option>Bahasa Indonesia</option>
-            <option>日本語</option>
           </select>
           <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500">▼</div>
         </div>
