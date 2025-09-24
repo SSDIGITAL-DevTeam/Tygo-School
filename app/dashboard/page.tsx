@@ -14,16 +14,19 @@ import {
   Search,
   ChevronUp,
   ChevronDown,
-  ChevronsUpDown,
+  Presentation,     // Teachers
+  GraduationCap,    // Students
+  Users,            // Parents
+  Shield,           // Admin
 } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
+// ===== Helpers ======================================================
 const toIDR = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
 const ordinal = (d: number) => {
-  const j = d % 10,
-    k = d % 100;
+  const j = d % 10, k = d % 100;
   if (j === 1 && k !== 11) return `${d}st`;
   if (j === 2 && k !== 12) return `${d}nd`;
   if (j === 3 && k !== 13) return `${d}rd`;
@@ -55,10 +58,10 @@ const baseRows: PaymentRow[] = [
 function makeRows(): PaymentRow[] {
   const classes = ["VII-A", "XI-A Regular", "XI-A Plus", "IX-A", "VIII-B"];
   const names = [
-    "Agus Salim", "Siti Nurhaliza", "Rudi Hartono", "Dewi Lestari", "Rangga Saputra",
-    "Maya Fitri", "Andi Wijaya", "Budi Santoso", "Citra Ayu", "Doni Pratama",
-    "Eka Putri", "Fajar Ramadhan", "Gita Savitri", "Halim Perdana", "Intan Permata",
-    "Joko Susilo", "Kirana Wulan", "Lutfi Kurnia", "Mawar Melati", "Naufal Rizky",
+    "Agus Salim","Siti Nurhaliza","Rudi Hartono","Dewi Lestari","Rangga Saputra",
+    "Maya Fitri","Andi Wijaya","Budi Santoso","Citra Ayu","Doni Pratama",
+    "Eka Putri","Fajar Ramadhan","Gita Savitri","Halim Perdana","Intan Permata",
+    "Joko Susilo","Kirana Wulan","Lutfi Kurnia","Mawar Melati","Naufal Rizky",
   ];
   const rows: PaymentRow[] = [...baseRows];
   let i = 0;
@@ -88,9 +91,7 @@ function exportCSV(rows: PaymentRow[]) {
   const fname = `payments_${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}.csv`;
   const header = ["Student Name", "Class", "Amount", "Status", "Due Date", "Payment Date"];
   const body = rows.map((r) => [r.name, r.class, r.amount, r.status, r.due, r.paidAt ?? "-/-"]);
-  const csv = [header, ...body]
-    .map((line) => line.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
-    .join("\n");
+  const csv = [header, ...body].map((line) => line.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -111,7 +112,15 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [rows] = useState<PaymentRow[]>(() => makeRows());
 
+  // Period
   const [period, setPeriod] = useState<{ month: number; year: number }>({ month: 7, year: 2025 });
+
+  // Dropdown open states (untuk panah atas/bawah)
+  const [openMonth, setOpenMonth] = useState(false);
+  const [openYear, setOpenYear] = useState(false);
+  const [openClass, setOpenClass] = useState(false);
+  const [openStatus, setOpenStatus] = useState(false);
+
   const [queryInput, setQueryInput] = useState("");
   const [query, setQuery] = useState("");
   const [classFilter, setClassFilter] = useState("All Class");
@@ -137,8 +146,7 @@ export default function DashboardPage() {
     if (statusFilter !== "All Status") out = out.filter((r) => r.status === (statusFilter as any));
     if (query) out = out.filter((r) => `${r.name} ${r.class}`.toLowerCase().includes(query));
     out.sort((a, b) => {
-      const va = a[sortKey];
-      const vb = b[sortKey];
+      const va = a[sortKey], vb = b[sortKey];
       const cmp =
         typeof va === "number" && typeof vb === "number"
           ? va - vb
@@ -155,19 +163,41 @@ export default function DashboardPage() {
 
   const toggleSort = (key: keyof PaymentRow) => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else {
-      setSortKey(key);
-      setSortDir("asc");
-    }
+    else { setSortKey(key); setSortDir("asc"); }
   };
 
   const periodLabel = `${months[period.month]}, ${period.year}`;
 
+  // === Overview data (pakai OverviewCard) ===
   const overview = [
-    { title: "Active Teachers", subtitle: "Total Active Teachers Count", value: 24, accent: "primary" as const },
-    { title: "Active Students", subtitle: "Total Active Students Count", value: 84 },
-    { title: "Parents", subtitle: "Total Parents Count", value: 310 },
-    { title: "Active Admin", subtitle: "Total Active Students Count", value: 8 },
+    {
+      title: "Active Teachers",
+      subtitle: "Total Active Teachers Count",
+      value: 24,
+      accent: "primary" as const,
+      icon: <Presentation className="h-5 w-5" />,
+    },
+    {
+      title: "Active Students",
+      subtitle: "Total Active Students Count",
+      value: 325,
+      accent: "default" as const,
+      icon: <GraduationCap className="h-5 w-5" />,
+    },
+    {
+      title: "Parents",
+      subtitle: "Total Parents Count",
+      value: 310,
+      accent: "default" as const,
+      icon: <Users className="h-5 w-5" />,
+    },
+    {
+      title: "Active Admin",
+      subtitle: "Total Active Admin Count",
+      value: 8,
+      accent: "default" as const,
+      icon: <Shield className="h-5 w-5" />,
+    },
   ];
 
   return (
@@ -184,12 +214,21 @@ export default function DashboardPage() {
               👋 Welcome, Dafa Aulia, have a great day !
             </h1>
 
+            {/* === Overview (match desain: 1 ungu, 3 putih) === */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              {overview.map((o, idx) => (
-                <OverviewCard key={idx} title={o.title} subtitle={o.subtitle} value={o.value} accent={idx === 0 ? "primary" : "default"} />
+              {overview.map((o) => (
+                <OverviewCard
+                  key={o.title}
+                  title={o.title}
+                  subtitle={o.subtitle}
+                  value={o.value}
+                  accent={o.accent}
+                  icon={o.icon}
+                />
               ))}
             </div>
 
+            {/* === Student Tuition Payments === */}
             <SectionCard
               title="Student Tuition Payments"
               headerRight={
@@ -198,29 +237,41 @@ export default function DashboardPage() {
                     <Calendar className="w-4 h-4" />
                     <span>Current Period ({periodLabel})</span>
                   </div>
+
+                  {/* Bulan */}
                   <div className="relative">
                     <select
                       value={period.month}
                       onChange={(e) => setPeriod((p) => ({ ...p, month: Number(e.target.value) }))}
+                      onFocus={() => setOpenMonth(true)}
+                      onBlur={() => setOpenMonth(false)}
                       className="appearance-none rounded-md border border-gray-300 bg-white px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
                     >
-                      {months.map((m, i) => (
-                        <option key={m} value={i}>{m}</option>
-                      ))}
+                      {months.map((m, i) => <option key={m} value={i}>{m}</option>)}
                     </select>
-                    <ChevronsUpDown className="absolute right-2 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
+                    {openMonth ? (
+                      <ChevronUp className="absolute right-2 top-3 w-4 h-4 text-gray-500 pointer-events-none" />
+                    ) : (
+                      <ChevronDown className="absolute right-2 top-3 w-4 h-4 text-gray-500 pointer-events-none" />
+                    )}
                   </div>
+
+                  {/* Tahun */}
                   <div className="relative">
                     <select
                       value={period.year}
                       onChange={(e) => setPeriod((p) => ({ ...p, year: Number(e.target.value) }))}
+                      onFocus={() => setOpenYear(true)}
+                      onBlur={() => setOpenYear(false)}
                       className="appearance-none rounded-md border border-gray-300 bg-white px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
                     >
-                      {[2023, 2024, 2025, 2026].map((y) => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
+                      {[2023, 2024, 2025, 2026].map((y) => <option key={y} value={y}>{y}</option>)}
                     </select>
-                    <ChevronsUpDown className="absolute right-2 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
+                    {openYear ? (
+                      <ChevronUp className="absolute right-2 top-3 w-4 h-4 text-gray-500 pointer-events-none" />
+                    ) : (
+                      <ChevronDown className="absolute right-2 top-3 w-4 h-4 text-gray-500 pointer-events-none" />
+                    )}
                   </div>
                 </div>
               }
@@ -228,32 +279,44 @@ export default function DashboardPage() {
               {/* Filters */}
               <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 mb-4">
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Class */}
                   <div className="relative">
                     <label className="block text-xs text-gray-600 mb-1">Class</label>
                     <select
                       value={classFilter}
                       onChange={(e) => setClassFilter(e.target.value)}
+                      onFocus={() => setOpenClass(true)}
+                      onBlur={() => setOpenClass(false)}
                       className="appearance-none w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
                     >
-                      {["All Class", "VII-A", "XI-A Regular", "XI-A Plus", "IX-A", "VIII-B"].map((c) => (
-                        <option key={c}>{c}</option>
-                      ))}
+                      {["All Class","VII-A","XI-A Regular","XI-A Plus","IX-A","VIII-B"].map((c) => <option key={c}>{c}</option>)}
                     </select>
-                    <ChevronsUpDown className="absolute right-2 top-8 w-4 h-4 text-gray-400 pointer-events-none" />
+                    {openClass ? (
+                      <ChevronUp className="absolute right-2 top-8 w-4 h-4 text-gray-500 pointer-events-none" />
+                    ) : (
+                      <ChevronDown className="absolute right-2 top-8 w-4 h-4 text-gray-500 pointer-events-none" />
+                    )}
                   </div>
+
+                  {/* Status */}
                   <div className="relative">
                     <label className="block text-xs text-gray-600 mb-1">Status</label>
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
+                      onFocus={() => setOpenStatus(true)}
+                      onBlur={() => setOpenStatus(false)}
                       className="appearance-none w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
                     >
-                      {["All Status", "Paid", "Unpaid"].map((s) => (
-                        <option key={s}>{s}</option>
-                      ))}
+                      {["All Status","Paid","Unpaid"].map((s) => <option key={s}>{s}</option>)}
                     </select>
-                    <ChevronsUpDown className="absolute right-2 top-8 w-4 h-4 text-gray-400 pointer-events-none" />
+                    {openStatus ? (
+                      <ChevronUp className="absolute right-2 top-8 w-4 h-4 text-gray-500 pointer-events-none" />
+                    ) : (
+                      <ChevronDown className="absolute right-2 top-8 w-4 h-4 text-gray-500 pointer-events-none" />
+                    )}
                   </div>
+
                   <div className="sm:col-span-1 flex sm:justify-end">
                     <button
                       onClick={() => exportCSV(filtered)}
@@ -295,20 +358,11 @@ export default function DashboardPage() {
                           {col.key === "action" ? (
                             <div className="flex justify-center">{col.label}</div>
                           ) : (
-                            <button
-                              onClick={() => toggleSort(col.key as keyof PaymentRow)}
-                              className="flex items-center gap-1 hover:underline"
-                            >
+                            <button onClick={() => toggleSort(col.key as keyof PaymentRow)} className="flex items-center gap-1 hover:underline">
                               {col.label}
-                              {sortKey === (col.key as keyof PaymentRow) ? (
-                                sortDir === "asc" ? (
-                                  <ChevronUp className="w-3.5 h-3.5" />
-                                ) : (
-                                  <ChevronDown className="w-3.5 h-3.5" />
-                                )
-                              ) : (
-                                <ChevronUp className="w-3.5 h-3.5 text-gray-400" />
-                              )}
+                              {sortKey === (col.key as keyof PaymentRow)
+                                ? (sortDir === "asc" ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />)
+                                : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
                             </button>
                           )}
                         </th>
@@ -343,12 +397,10 @@ export default function DashboardPage() {
                   <span>Showing</span>
                   <select
                     value={pageSize}
-                    onChange={(e) => setPageSize(Number(e.target.value))}
+                    onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
                     className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
                   >
-                    {[4, 10, 25].map((n) => (
-                      <option key={n} value={n}>{n}</option>
-                    ))}
+                    {[4, 10, 25].map((n) => <option key={n} value={n}>{n}</option>)}
                   </select>
                   <span>from {total} data</span>
                 </div>

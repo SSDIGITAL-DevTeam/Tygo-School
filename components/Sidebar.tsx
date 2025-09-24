@@ -1,287 +1,293 @@
 "use client";
-import React, { useMemo, useState } from "react";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Users, ChevronDown } from "lucide-react";
-
-type Label =
-  | "Dashboard"
-  | "Master Data"
-  | "Students Data"
-  | "Role & Access"
-  | "Tuition Fee Management"
-  | "School Settings";
+import {
+  LayoutDashboard,
+  BookOpen,
+  GraduationCap,
+  Users,
+  Settings,
+  DollarSign,
+  ChevronDown,
+  LogOut,
+} from "lucide-react";
 
 type SidebarProps = {
   isOpen: boolean;
   onClose?: () => void;
-  // Optional manual active override; when absent, detects from current pathname
-  active?: Label;
 };
 
-type ChildItem = { label: string; href: string };
-
-type MenuItem = {
-  label: Label;
-  href?: string;
-  children?: ChildItem[];
-};
-
-// Reusable Sidebar with fixed width and optional active item
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
-  const purple = "#6c2bd9";
-  const bgLight = "#f5f6fa";
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const pathname = usePathname() || "/";
   const router = useRouter();
-  const [loggingOut, setLoggingOut] = useState(false);
 
-  const pathname = usePathname();
-  // Basic auto-detection based on route prefix
-  const autoActive: Label = pathname?.startsWith("/students")
-    ? "Students Data"
-    : pathname?.startsWith("/role-access")
-    ? "Role & Access"
-    : pathname?.startsWith("/master-data")
-    ? "Master Data"
-    : "Dashboard";
-  const activeLabel: Label = active ?? autoActive;
+  const isRoute = (p: string) => pathname === p;
+  const starts = (p: string) => pathname.startsWith(p);
 
-  // Role & Access accordion open state (default open when in /role-access/*)
-  const defaultOpenRole = useMemo(
-    () => (pathname?.startsWith("/role-access") ? true : false),
-    [pathname]
+  // default accordion open if berada di route-nya
+  const [openMaster, setOpenMaster] = useState(starts("/master-data"));
+  const [openRole, setOpenRole] = useState(starts("/role-access"));
+
+  // warna sesuai UI
+  const ACTIVE_PURPLE = "bg-[#6c2bd9] text-white";      // item aktif (ungu penuh)
+  const PARENT_OPEN   = "bg-gray-100 text-gray-900";     // parent accordion saat dibuka / berada di section
+  const PARENT_BASE   = "text-gray-800 hover:bg-gray-50";
+  const CHILD_ACTIVE  = ACTIVE_PURPLE;                   // child aktif = ungu
+  const CHILD_BASE    = "text-gray-700 hover:bg-gray-50";
+
+  const handleNav = () => onClose?.();
+
+  const onLogout = async () => {
+    try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
+    handleNav();
+    router.push("/login");
+    router.refresh();
+  };
+
+  // helper komponen ikon biar gampang switch warna
+  const IconWrap = ({ children }: { children: React.ReactNode }) => (
+    <span className="inline-flex items-center justify-center w-5 h-5">{children}</span>
   );
-  const [roleOpen, setRoleOpen] = useState<boolean>(defaultOpenRole);
-
-  const menuItems: MenuItem[] = [
-    { label: "Dashboard", href: "/dashboard" },
-    {
-      label: "Master Data",
-      children: [
-        { label: "Subjects", href: "/master-data/subjects" },
-        { label: "Teachers", href: "/master-data/teachers-management/teacher-list" },
-        {
-          label: "Students Report Format",
-          href: "/master-data/student-report/assessment-category",
-        },
-        { label: "Classes", href: "/master-data/classes" },
-      ],
-    },
-    { label: "Students Data", href: "/students" },
-    { label: "Role & Access" }, // accordion khusus di bawah sudah OK
-    { label: "Tuition Fee Management", href: "/tuition" },
-    { label: "School Settings", href: "/settings" },
-  ];
 
   return (
     <>
-      {/* Mobile overlay */}
+      {/* overlay mobile */}
       <div
         className={`fixed inset-0 bg-black/30 z-20 md:hidden transition-opacity ${
-          isOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
       />
 
-      {/* Sidebar panel */}
+      {/* sidebar (tanpa border-r agar tidak ada garis vertikal) */}
       <aside
-        className={`fixed left-0 top-0 z-30 h-screen w-64 border-r bg-slate-50 pointer-events-auto
-          transform transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-        `}
-        style={{ backgroundColor: bgLight }}
+        className={`fixed left-0 top-0 z-30 h-screen w-64 bg-white transition-transform duration-300 ease-in-out
+          ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
-        {/* Header: Logo + School name */}
-        <div className="flex items-center gap-3 p-4 border-b border-gray-200">
-          <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-white font-bold">
-            CB
+        <div className="h-full flex flex-col">
+          {/* header—tinggi sama topbar */}
+          <div className="h-[60px] px-4 bg-white border-b border-gray-200 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-md bg-blue-600 text-white grid place-items-center text-xs font-bold">
+              CB
+            </div>
+            <span className="font-semibold text-gray-800 truncate">Citra Budaya School</span>
           </div>
-          <div className="font-semibold text-gray-800">Citra Budaya School</div>
-        </div>
 
-        {/* Menu */}
-        <nav className="p-3 overflow-y-auto h-[calc(100%-140px)] md:h-[calc(100vh-140px)]">
-          <ul className="space-y-1">
-            {menuItems.map((item) => {
-              const isActive = item.label === activeLabel;
-              return (
-                <li key={item.label}>
-                  {/* Special case: Role & Access parent as accordion */}
-                  {item.label === "Role & Access" ? (
-                    <>
-                      <button
-                        onClick={() => setRoleOpen((v) => !v)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-md transition-colors ${
-                          pathname?.startsWith("/role-access")
-                            ? "bg-violet-100 text-violet-700"
-                            : "text-gray-700 hover:bg-white/60"
+          {/* menu */}
+          <nav className="flex-1 overflow-y-auto p-2">
+            <ul className="space-y-1">
+              {/* Dashboard (leaf) */}
+              <li>
+                <Link
+                  href="/dashboard"
+                  onClick={handleNav}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-md ${
+                    starts("/dashboard") || pathname === "/" ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
+                  }`}
+                >
+                  <IconWrap>
+                    <LayoutDashboard
+                      className={`w-5 h-5 ${
+                        starts("/dashboard") || pathname === "/" ? "text-white" : "text-gray-700"
+                      }`}
+                    />
+                  </IconWrap>
+                  Dashboard
+                </Link>
+              </li>
+
+              {/* Master Data (parent: abu-abu saat open; child aktif = ungu) */}
+              <li>
+                <button
+                  onClick={() => setOpenMaster(v => !v)}
+                  className={`w-full flex items-center justify-between px-4 py-2 rounded-md ${
+                    starts("/master-data") || openMaster ? PARENT_OPEN : PARENT_BASE
+                  }`}
+                  aria-expanded={openMaster}
+                  aria-controls="master-children"
+                >
+                  <span className="flex items-center gap-3">
+                    <IconWrap>
+                      <BookOpen
+                        className={`w-5 h-5 ${
+                          starts("/master-data") || openMaster ? "text-gray-700" : "text-gray-700"
+                        }`}
+                      />
+                    </IconWrap>
+                    <span className={starts("/master-data") ? "font-semibold" : "font-medium"}>
+                      Master Data
+                    </span>
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform ${
+                      openMaster ? "rotate-180" : ""
+                    } ${starts("/master-data") || openMaster ? "text-gray-700" : "text-gray-500"}`}
+                  />
+                </button>
+
+                {openMaster && (
+                  <ul id="master-children" className="mt-1 space-y-1">
+                    <li>
+                      <Link
+                        href="/master-data/subjects"
+                        onClick={handleNav}
+                        className={`block pl-11 pr-4 py-2 rounded-md ${
+                          isRoute("/master-data/subjects") ? CHILD_ACTIVE : CHILD_BASE
                         }`}
                       >
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          <span
-                            className={
-                              pathname?.startsWith("/role-access")
-                                ? "font-semibold"
-                                : "font-medium"
-                            }
-                          >
-                            Role &amp; Access
-                          </span>
-                        </div>
-                        <ChevronDown
-                          className={`w-4 h-4 transition-transform ${
-                            roleOpen ? "rotate-180" : "rotate-0"
-                          }`}
-                        />
-                      </button>
-                      {roleOpen && (
-                        <ul className="mt-1 space-y-1">
-                          <li>
-                            <Link
-                              href="/role-access/role-management"
-                              className={`block pl-8 pr-3 py-2 rounded-md ${
-                                pathname?.startsWith(
-                                  "/role-access/role-management"
-                                )
-                                  ? "bg-violet-700 text-white"
-                                  : "text-slate-700 hover:bg-slate-100"
-                              }`}
-                              onClick={onClose}
-                              aria-label="Role Management"
-                            >
-                              Role Management
-                            </Link>
-                          </li>
-                          <li>
-                            <Link
-                              href="/role-access/admin-list"
-                              className={`block pl-8 pr-3 py-2 rounded-md ${
-                                pathname?.startsWith("/role-access/admin-list")
-                                  ? "bg-violet-700 text-white"
-                                  : "text-slate-700 hover:bg-slate-100"
-                              }`}
-                              onClick={onClose}
-                              aria-label="Admin List"
-                            >
-                              Admin List
-                            </Link>
-                          </li>
-                        </ul>
-                      )}
-                    </>
-                  ) : item.href ? (
-                    <Link
-                      href={item.href}
-                      onClick={onClose}
-                      className={`block px-3 py-2 rounded-md transition-colors ${
-                        isActive
-                          ? "bg-[#6c2bd9] text-white shadow-sm"
-                          : "text-gray-700 hover:bg-white/60"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="inline-block w-2.5 h-2.5 rounded-sm"
-                          style={{
-                            backgroundColor: isActive ? "#fff" : "#CBD5E1",
-                          }}
-                        />
-                        <span
-                          className={isActive ? "font-semibold" : "font-medium"}
-                        >
-                          {item.label}
-                        </span>
-                      </div>
-                    </Link>
-                  ) : (
-                    <button
-                      className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                        isActive
-                          ? "bg-[#6c2bd9] text-white shadow-sm"
-                          : "text-gray-700 hover:bg-white/60"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="inline-block w-2.5 h-2.5 rounded-sm"
-                          style={{
-                            backgroundColor: isActive ? "#fff" : "#CBD5E1",
-                          }}
-                        />
-                        <span
-                          className={isActive ? "font-semibold" : "font-medium"}
-                        >
-                          {item.label}
-                        </span>
-                      </div>
-                    </button>
-                  )}
-                  {item.children && item.label !== "Role & Access" && (
-                    <ul className="mt-1 ml-7 space-y-1">
-                      {item.children.map((sub) => {
-                        const subActive = pathname?.startsWith(sub.href);
-                        return (
-                          <li key={sub.label}>
-                            <Link
-                              href={sub.href}
-                              onClick={onClose}
-                              className={`block text-sm px-2 py-1 rounded-md transition-colors ${
-                                subActive
-                                  ? "bg-violet-700 text-white"
-                                  : "text-gray-600 hover:text-gray-800 hover:bg-white/60"
-                              }`}
-                              aria-label={sub.label}
-                            >
-                              {sub.label}
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+                        Subjects
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/master-data/teachers-management/teacher-list"
+                        onClick={handleNav}
+                        className={`block pl-11 pr-4 py-2 rounded-md ${
+                          starts("/master-data/teachers-management/teacher-list") ? CHILD_ACTIVE : CHILD_BASE
+                        }`}
+                      >
+                        Teachers
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/master-data/student-report/assessment-category"
+                        onClick={handleNav}
+                        className={`block pl-11 pr-4 py-2 rounded-md ${
+                          isRoute("/master-data/student-report/assessment-category") ? CHILD_ACTIVE : CHILD_BASE
+                        }`}
+                      >
+                        Students Report Format
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/master-data/classes"
+                        onClick={handleNav}
+                        className={`block pl-11 pr-4 py-2 rounded-md ${
+                          isRoute("/master-data/classes") ? CHILD_ACTIVE : CHILD_BASE
+                        }`}
+                      >
+                        Classes
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </li>
 
-        {/* Logout button */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-200">
-          <button
-            aria-label="Log out"
-            disabled={loggingOut}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-md text-pink-700 bg-pink-100 hover:bg-pink-200 disabled:opacity-60 transition-colors"
-            onClick={async () => {
-              try {
-                setLoggingOut(true);
-                await fetch("/api/auth/logout", { method: "POST" });
-                onClose?.();
-                router.push("/login");
-                router.refresh();
-              } finally {
-                setLoggingOut(false);
-              }
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-5 h-5"
+              {/* Students Data (leaf) */}
+              <li>
+                <Link
+                  href="/students"
+                  onClick={handleNav}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-md ${
+                    starts("/students") ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
+                  }`}
+                >
+                  <IconWrap>
+                    <GraduationCap className={`w-5 h-5 ${starts("/students") ? "text-white" : "text-gray-700"}`} />
+                  </IconWrap>
+                  Students Data
+                </Link>
+              </li>
+
+              {/* Role & Access (parent abu-abu saat open) */}
+              <li>
+                <button
+                  onClick={() => setOpenRole(v => !v)}
+                  className={`w-full flex items-center justify-between px-4 py-2 rounded-md ${
+                    starts("/role-access") || openRole ? PARENT_OPEN : PARENT_BASE
+                  }`}
+                  aria-expanded={openRole}
+                  aria-controls="role-children"
+                >
+                  <span className="flex items-center gap-3">
+                    <IconWrap>
+                      <Users className={`w-5 h-5 ${starts("/role-access") || openRole ? "text-gray-700" : "text-gray-700"}`} />
+                    </IconWrap>
+                    <span className={starts("/role-access") ? "font-semibold" : "font-medium"}>Role &amp; Access</span>
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform ${
+                      openRole ? "rotate-180" : ""
+                    } ${starts("/role-access") || openRole ? "text-gray-700" : "text-gray-500"}`}
+                  />
+                </button>
+
+                {openRole && (
+                  <ul id="role-children" className="mt-1 space-y-1">
+                    <li>
+                      <Link
+                        href="/role-access/role-management"
+                        onClick={handleNav}
+                        className={`block pl-11 pr-4 py-2 rounded-md ${
+                          starts("/role-access/role-management") ? CHILD_ACTIVE : CHILD_BASE
+                        }`}
+                      >
+                        Role Management
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/role-access/admin-list"
+                        onClick={handleNav}
+                        className={`block pl-11 pr-4 py-2 rounded-md ${
+                          starts("/role-access/admin-list") ? CHILD_ACTIVE : CHILD_BASE
+                        }`}
+                      >
+                        Admin List
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </li>
+
+              {/* Tuition (leaf) */}
+              <li>
+                <Link
+                  href="/tuition"
+                  onClick={handleNav}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-md ${
+                    starts("/tuition") ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
+                  }`}
+                >
+                  <IconWrap>
+                    <DollarSign className={`w-5 h-5 ${starts("/tuition") ? "text-white" : "text-gray-700"}`} />
+                  </IconWrap>
+                  Tuition Fee Management
+                </Link>
+              </li>
+
+              {/* Settings (leaf) */}
+              <li>
+                <Link
+                  href="/school-settings"
+                  onClick={handleNav}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-md ${
+                    starts("/school-settings") ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
+                  }`}
+                >
+                  <IconWrap>
+                    <Settings className={`w-5 h-5 ${starts("/school-settings") ? "text-white" : "text-gray-700"}`} />
+                  </IconWrap>
+                  School Settings
+                </Link>
+              </li>
+            </ul>
+          </nav>
+
+          {/* logout */}
+          <div className="p-3 border-t border-gray-200">
+            <button
+              onClick={onLogout}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-md bg-pink-100 text-pink-700 hover:bg-pink-200 font-semibold"
             >
-              <path d="M12 2.25a.75.75 0 0 1 .75.75v8a.75.75 0 0 1-1.5 0v-8A.75.75 0 0 1 12 2.25Z" />
-              <path
-                fillRule="evenodd"
-                d="M5.47 5.47a.75.75 0 0 1 1.06 0 8.25 8.25 0 1 1 11.66 11.66.75.75 0 1 1-1.06-1.06A6.75 6.75 0 1 0 6.53 6.53a.75.75 0 0 1 0-1.06Z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span className="font-semibold">
-              {loggingOut ? "Logging Out..." : "Log Out"}
-            </span>
-          </button>
+              <LogOut className="w-5 h-5" />
+              Log Out
+            </button>
+          </div>
         </div>
       </aside>
     </>
@@ -289,3 +295,4 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
 };
 
 export default Sidebar;
+
