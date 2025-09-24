@@ -5,13 +5,7 @@ import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
-import {
-  ArrowLeft,
-  GraduationCap,
-  Plus,
-  Save,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, GraduationCap, Plus, Save, Trash2 } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -70,6 +64,9 @@ const AddClassesPage: React.FC = () => {
 
   const updateSubject = (index: number, value: string) => {
     setSubjectSelections((prev) => {
+      if (value && prev.some((v, i) => i !== index && v === value)) {
+        return prev; // abaikan jika sudah dipakai dropdown lain
+      }
       const next = [...prev];
       next[index] = value;
       return next;
@@ -77,7 +74,9 @@ const AddClassesPage: React.FC = () => {
   };
 
   const removeSubject = (index: number) => {
-    setSubjectSelections((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+    setSubjectSelections((prev) =>
+      prev.filter((_, itemIndex) => itemIndex !== index)
+    );
   };
 
   const addReportSelect = () => {
@@ -86,6 +85,9 @@ const AddClassesPage: React.FC = () => {
 
   const updateReport = (index: number, value: string) => {
     setReportSelections((prev) => {
+      if (value && prev.some((v, i) => i !== index && v === value)) {
+        return prev; // abaikan jika sudah dipakai dropdown lain
+      }
       const next = [...prev];
       next[index] = value;
       return next;
@@ -93,8 +95,23 @@ const AddClassesPage: React.FC = () => {
   };
 
   const removeReport = (index: number) => {
-    setReportSelections((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+    setReportSelections((prev) =>
+      prev.filter((_, itemIndex) => itemIndex !== index)
+    );
   };
+
+  const selectedSubjectSet = useMemo(
+    () => new Set(subjectSelections.filter(Boolean)),
+    [subjectSelections]
+  );
+  const selectedReportSet = useMemo(
+    () => new Set(reportSelections.filter(Boolean)),
+    [reportSelections]
+  );
+
+  const allSubjectsChosen =
+    selectedSubjectSet.size >= uniqueSubjectOptions.length;
+  const allReportsChosen = selectedReportSet.size >= uniqueReportOptions.length;
 
   return (
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
@@ -132,7 +149,9 @@ const AddClassesPage: React.FC = () => {
                     <GraduationCap className="h-6 w-6" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-semibold text-gray-900">Add Classes</h1>
+                    <h1 className="text-xl font-semibold text-gray-900">
+                      Add Classes
+                    </h1>
                   </div>
                 </div>
               </div>
@@ -163,7 +182,9 @@ const AddClassesPage: React.FC = () => {
                       input={
                         <select
                           value={homeroomTeacher}
-                          onChange={(event) => setHomeroomTeacher(event.target.value)}
+                          onChange={(event) =>
+                            setHomeroomTeacher(event.target.value)
+                          }
                           className="w-full max-w-md rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/30"
                         >
                           <option value="" disabled>
@@ -186,7 +207,10 @@ const AddClassesPage: React.FC = () => {
                           inputMode="numeric"
                           value={classCapacity}
                           onChange={(event) => {
-                            const nextValue = event.target.value.replace(/[^0-9]/g, "");
+                            const nextValue = event.target.value.replace(
+                              /[^0-9]/g,
+                              ""
+                            );
                             setClassCapacity(nextValue);
                           }}
                           placeholder="Input Class Capacity (Number Only)"
@@ -206,12 +230,23 @@ const AddClassesPage: React.FC = () => {
                             >
                               <select
                                 value={value}
-                                onChange={(event) => updateSubject(index, event.target.value)}
+                                onChange={(event) =>
+                                  updateSubject(index, event.target.value)
+                                }
                                 className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/30"
                               >
-                                <option value="">Select Subject</option>
+                                <option value="" disabled>
+                                  – Select Subject –
+                                </option>
                                 {uniqueSubjectOptions.map((option) => (
-                                  <option key={option} value={option}>
+                                  <option
+                                    key={option}
+                                    value={option}
+                                    disabled={
+                                      selectedSubjectSet.has(option) &&
+                                      option !== value
+                                    }
+                                  >
                                     {option}
                                   </option>
                                 ))}
@@ -251,12 +286,23 @@ const AddClassesPage: React.FC = () => {
                             >
                               <select
                                 value={value}
-                                onChange={(event) => updateReport(index, event.target.value)}
+                                onChange={(event) =>
+                                  updateReport(index, event.target.value)
+                                }
                                 className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/30"
                               >
-                                <option value="">Select Report Format</option>
+                                <option value="" disabled>
+                                  – Select Report Format –
+                                </option>
                                 {uniqueReportOptions.map((option) => (
-                                  <option key={option} value={option}>
+                                  <option
+                                    key={option}
+                                    value={option}
+                                    disabled={
+                                      selectedReportSet.has(option) &&
+                                      option !== value
+                                    }
+                                  >
                                     {option}
                                   </option>
                                 ))}
