@@ -1,0 +1,14 @@
+# Ignored folders
+node_modules/
+.next/
+
+# Ignored files
+.env
+.env.local
+.env.production
+.env.development
+.env.*
+
+# Log files and others
+npm-debug.log*
+yarn-error.log*
