@@ -258,7 +258,7 @@ const SubjectManagementPage: React.FC = () => {
                           setPage(1);
                         }}
                         placeholder="Search Here"
-                        className="w-full rounded-md border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm text-gray-700 shadow-sm transition focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/30"
+                        className="w-1/3 rounded-md border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm text-gray-700 shadow-sm transition focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/30"
                       />
                     </div>
                     <button

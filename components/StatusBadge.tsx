@@ -10,8 +10,8 @@ type StatusBadgeProps = {
 const palettes: Record<Status, { bg: string; text: string }> = {
   Paid: { bg: "bg-[#e6f7ed]", text: "text-green-700" },
   Unpaid: { bg: "bg-[#ffe9e7]", text: "text-red-600" },
-  Active: { bg: "bg-[#e6f7ed]", text: "text-green-700" },
-  "Non Active": { bg: "bg-[#ffe9e7]", text: "text-red-600" },
+  Active: { bg: "bg-[#25D366]/15", text: "text-[#1D9F4E]" },
+  "Non Active": { bg: "bg-[#ED3500]/15", text: "text-[#ED3500]" },
 };
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
