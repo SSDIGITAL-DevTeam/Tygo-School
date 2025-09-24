@@ -1,31 +1,14 @@
-# dependencies
+# Ignored folders
 node_modules/
-.pnp/
-.pnp.js
-
-# testing
-coverage/
-
-# production
-build/
-dist/
 .next/
 
-# misc
-.DS_Store
-*.pem
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# env
+# Ignored files
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.production
+.env.development
+.env.*
 
-# vercel
-.vercel/
+# Log files and others
+npm-debug.log*
+yarn-error.log*

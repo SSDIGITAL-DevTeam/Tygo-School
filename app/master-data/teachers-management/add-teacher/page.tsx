@@ -5,6 +5,7 @@ import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
 import ConfirmModal from "../../../../components/modal/AddTeacherModal";
 import { Inter } from "next/font/google";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   BookOpen,
@@ -40,22 +41,22 @@ const AddTeacherPage: React.FC = () => {
   const [phonePrefix, setPhonePrefix] = useState(phonePrefixes[0]);
   const [phoneNumber, setPhoneNumber] = useState("");
 
-  const [selectedSubject, setSelectedSubject] = useState(subjectOptions[0]);
-  const [subjects, setSubjects] = useState<string[]>([]);
+  // const [selectedSubject, setSelectedSubject] = useState(subjectOptions[0]);
+  // const [subjects, setSubjects] = useState<string[]>([]);
+  const [subjectSelections, setSubjectSelections] = useState<string[]>([""]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const subjectChoices = useMemo(() => subjectOptions, []);
+  const selectedSet = useMemo(
+    () => new Set(subjectSelections.filter(Boolean)),
+    [subjectSelections]
+  );
 
-  const addSubject = () => {
-    if (!selectedSubject || subjects.includes(selectedSubject)) return;
-    setSubjects((prev) => [...prev, selectedSubject]);
-  };
+  const allChosen = selectedSet.size >= subjectOptions.length;
 
-  const removeSubject = (subject: string) => {
-    setSubjects((prev) => prev.filter((item) => item !== subject));
-  };
+  const router = useRouter();
 
   const resetForm = () => {
     setTeacherId("");
@@ -64,8 +65,27 @@ const AddTeacherPage: React.FC = () => {
     setPassword("");
     setPhonePrefix(phonePrefixes[0]);
     setPhoneNumber("");
-    setSubjects([]);
-    setSelectedSubject(subjectOptions[0]);
+    setSubjectSelections([""]); // back to a single empty select
+  };
+
+  const addSubjectSelect = () => {
+    setSubjectSelections((prev) => [...prev, ""]);
+  };
+
+  const removeSubjectSelect = (index: number) => {
+    setSubjectSelections((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateSubjectAt = (index: number, value: string) => {
+    setSubjectSelections((prev) => {
+      // if another dropdown already has this value, ignore the change
+      if (value && prev.some((s, i) => i !== index && s === value)) {
+        return prev; // no change
+      }
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -74,13 +94,16 @@ const AddTeacherPage: React.FC = () => {
   };
 
   const handleConfirm = () => {
+    const chosenSubjects = Array.from(
+      new Set(subjectSelections.filter((s) => s && s !== ""))
+    );
     const payload = {
       teacherId,
       fullName,
       email,
       password,
       phone: `${phonePrefix} ${phoneNumber}`.trim(),
-      subjects,
+      subjects: chosenSubjects,
     };
     console.log("Saving teacher", payload);
     setModalOpen(false);
@@ -90,6 +113,7 @@ const AddTeacherPage: React.FC = () => {
   };
 
   return (
+    
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
       <div className="flex">
         <Sidebar
@@ -120,6 +144,7 @@ const AddTeacherPage: React.FC = () => {
               <div className="flex items-center gap-4">
                 <button
                   type="button"
+                  onClick={() => router.push("/master-data/teachers-management/teacher-list")}
                   aria-label="Back to teacher list"
                   className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition-colors hover:border-[#6c2bd9] hover:text-[#6c2bd9]"
                 >
@@ -133,9 +158,6 @@ const AddTeacherPage: React.FC = () => {
                     <h1 className="text-xl font-semibold text-gray-900">
                       Add Teacher
                     </h1>
-                    <p className="text-sm text-gray-500">
-                      Fill in the teacher credentials before saving to the system.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -208,48 +230,67 @@ const AddTeacherPage: React.FC = () => {
                     label="Subject Specialization"
                     required
                     input={
-                      <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex w-full max-w-xs items-center overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm">
-                          <select
-                            value={selectedSubject}
-                            onChange={(event) => setSelectedSubject(event.target.value)}
-                            className="flex-1 appearance-none bg-transparent px-3 py-2 text-sm text-gray-700 focus:outline-none"
+                      <div className="flex flex-col gap-3">
+                        {/* Render one select per selection */}
+                        {subjectSelections.map((value, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-2 max-w-md"
                           >
-                            {subjectChoices.map((subject) => (
-                              <option key={subject} value={subject}>
-                                {subject}
-                              </option>
-                            ))}
-                          </select>
+                            <div className="flex-1 overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm">
+                              <select
+                                value={value}
+                                onChange={(e) =>
+                                  updateSubjectAt(idx, e.target.value)
+                                }
+                                className="w-full appearance-none bg-transparent px-3 py-2 text-sm text-gray-700 focus:outline-none"
+                              >
+                                <option value="" disabled>
+                                  – Select Subject –
+                                </option>
+                                {subjectOptions.map((subject) => (
+                                  <option
+                                    key={subject}
+                                    value={subject}
+                                    // disable if selected elsewhere; allow the current row's own value
+                                    disabled={
+                                      selectedSet.has(subject) &&
+                                      subject !== value
+                                    }
+                                  >
+                                    {subject}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Remove button (hide for first item if you like) */}
+                            {subjectSelections.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeSubjectSelect(idx)}
+                                className="inline-flex items-center justify-center rounded-lg border border-gray-200 p-2 text-gray-500 hover:text-[#6c2bd9] hover:border-[#6c2bd9]"
+                                aria-label="Remove subject dropdown"
+                                title="Remove"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+
+                        {/* Add another dropdown */}
+                        <div>
                           <button
                             type="button"
-                            onClick={addSubject}
-                            className="h-full border-l border-gray-200 px-3 text-[#6c2bd9] transition-colors hover:bg-purple-50"
-                            aria-label="Add subject"
+                            onClick={addSubjectSelect}
+                            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-[#6c2bd9] hover:bg-purple-50"
+                            aria-label="Add another subject dropdown"
                           >
                             <Plus className="h-4 w-4" />
+                            Add Subject
                           </button>
                         </div>
-                        {subjects.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {subjects.map((subject) => (
-                              <span
-                                key={subject}
-                                className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-[#6c2bd9]"
-                              >
-                                {subject}
-                                <button
-                                  type="button"
-                                  aria-label={`Remove ${subject}`}
-                                  onClick={() => removeSubject(subject)}
-                                  className="rounded-full p-0.5 text-[#6c2bd9]/70 hover:bg-purple-100 hover:text-[#581c87]"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </button>
-                              </span>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     }
                   />
@@ -260,7 +301,9 @@ const AddTeacherPage: React.FC = () => {
                       <div className="flex w-full max-w-md items-center gap-2">
                         <select
                           value={phonePrefix}
-                          onChange={(event) => setPhonePrefix(event.target.value)}
+                          onChange={(event) =>
+                            setPhonePrefix(event.target.value)
+                          }
                           className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/40"
                         >
                           {phonePrefixes.map((prefix) => (
@@ -270,8 +313,17 @@ const AddTeacherPage: React.FC = () => {
                           ))}
                         </select>
                         <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          onInput={(e) => {
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9]/g, "");
+                          }}
                           value={phoneNumber}
-                          onChange={(event) => setPhoneNumber(event.target.value)}
+                          onChange={(event) =>
+                            setPhoneNumber(event.target.value)
+                          }
                           placeholder="Enter Phone Number"
                           className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/40"
                         />
@@ -327,6 +379,5 @@ const FormRow: React.FC<{
     <div className="min-w-0">{input}</div>
   </label>
 );
-
 
 export default AddTeacherPage;
