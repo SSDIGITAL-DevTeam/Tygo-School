@@ -140,7 +140,6 @@ const SubjectManagementPage: React.FC = () => {
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          active="Master Data"
         />
 
         <div className="flex-1 min-h-screen flex flex-col">
