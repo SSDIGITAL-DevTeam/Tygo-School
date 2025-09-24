@@ -263,14 +263,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               {/* Settings (leaf) */}
               <li>
                 <Link
-                  href="/settings"
+                  href="/school-settings"
                   onClick={handleNav}
                   className={`flex items-center gap-3 px-4 py-2 rounded-md ${
-                    starts("/settings") ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
+                    starts("/school-settings") ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
                   }`}
                 >
                   <IconWrap>
-                    <Settings className={`w-5 h-5 ${starts("/settings") ? "text-white" : "text-gray-700"}`} />
+                    <Settings className={`w-5 h-5 ${starts("/school-settings") ? "text-white" : "text-gray-700"}`} />
                   </IconWrap>
                   School Settings
                 </Link>
@@ -295,3 +295,4 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 };
 
 export default Sidebar;
+
