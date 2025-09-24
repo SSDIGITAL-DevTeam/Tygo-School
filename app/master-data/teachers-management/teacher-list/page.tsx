@@ -6,6 +6,7 @@ import Header from "../../../../components/Header";
 import Pagination from "../../../../components/Pagination";
 import StatusBadge from "../../../../components/StatusBadge";
 import { Inter } from "next/font/google";
+import { useRouter } from "next/navigation";
 import {
   ArrowUpDown,
   ChevronDown,
@@ -296,6 +297,8 @@ const TeacherManagementPage: React.FC = () => {
     setPage(1);
   };
 
+  const router = useRouter();
+
   return (
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
       <div className="flex">
@@ -342,6 +345,7 @@ const TeacherManagementPage: React.FC = () => {
                 <div className="flex flex-wrap items-center gap-3">
                   <button
                     type="button"
+                    onClick={() => router.push("/master-data/teachers-management/add-teacher")}
                     className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#581c87]"
                   >
                     <Plus className="w-4 h-4" />

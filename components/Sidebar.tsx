@@ -58,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, active }) => {
       label: "Master Data",
       children: [
         { label: "Subjects", href: "/master-data/subjects" },
-        { label: "Teachers", href: "/master-data/teachers-management/teacherList" },
+        { label: "Teachers", href: "/master-data/teachers-management/teacher-list" },
         {
           label: "Students Report Format",
           href: "/master-data/students-report-format",

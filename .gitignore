@@ -1,6 +1,6 @@
 # dependencies
-node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.js
 
 # testing
@@ -9,7 +9,7 @@ node_modules
 # production
 /build
 /dist
-/.next
+.next
 
 # misc
 .DS_Store
@@ -29,8 +29,3 @@ pnpm-debug.log*
 
 # vercel
 .vercel
-
-node_modules
-.next
-dist
-out
