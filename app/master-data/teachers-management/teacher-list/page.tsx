@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
 import Pagination from "../../../../components/Pagination";
@@ -20,164 +20,13 @@ import {
   Search,
   X,
 } from "lucide-react";
-
-type TeacherRow = {
-  id: string;
-  fullName: string;
-  email: string;
-  subjects: string[];
-  homeroomClass: string | null;
-  status: "Active" | "Non Active";
-};
+import { getTeacherList, TeacherRecord } from "../teacher-data";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const featuredRows: TeacherRow[] = [
-  {
-    id: "123456",
-    fullName: "Dafa Aulia",
-    email: "dafa@gmail.com",
-    subjects: ["Math 01", "English 01"],
-    homeroomClass: "VII-A",
-    status: "Active",
-  },
-  {
-    id: "789012",
-    fullName: "Ryan Kusuma",
-    email: "ryan@gmail.com",
-    subjects: ["English 02"],
-    homeroomClass: "IX-A",
-    status: "Active",
-  },
-  {
-    id: "345678",
-    fullName: "Heriyanto",
-    email: "heriyanto@gmail.com",
-    subjects: ["Math 01", "Programming 02"],
-    homeroomClass: null,
-    status: "Non Active",
-  },
-  {
-    id: "901234",
-    fullName: "Imroatus",
-    email: "imroatus@gmail.com",
-    subjects: ["Programming 01"],
-    homeroomClass: null,
-    status: "Non Active",
-  },
-];
+type TeacherRow = TeacherRecord;
 
-const leadingRows: TeacherRow[] = [
-  {
-    id: "102345",
-    fullName: "Anisa Putri",
-    email: "anisa.putri@school.id",
-    subjects: ["Math 02"],
-    homeroomClass: "VII-B",
-    status: "Active",
-  },
-  {
-    id: "104221",
-    fullName: "Bambang Maulana",
-    email: "bambang.maulana@school.id",
-    subjects: ["Science 01"],
-    homeroomClass: "VIII-A",
-    status: "Active",
-  },
-  {
-    id: "105987",
-    fullName: "Citra Dewi",
-    email: "citra.dewi@school.id",
-    subjects: ["English 01"],
-    homeroomClass: "IX-B",
-    status: "Active",
-  },
-  {
-    id: "108002",
-    fullName: "Doni Saputra",
-    email: "doni.saputra@school.id",
-    subjects: ["Programming 01"],
-    homeroomClass: null,
-    status: "Non Active",
-  },
-];
-
-const extraNames = [
-  "Eka Pratama",
-  "Fajar Ramdhan",
-  "Gita Lestari",
-  "Herman Wijaya",
-  "Indah Kartika",
-  "Joko Santoso",
-  "Kirana Safira",
-  "Lutfi Rahman",
-  "Maya Anggraini",
-  "Nurul Mawar",
-  "Oskar Firmansyah",
-  "Putri Prawita",
-  "Qori Safitri",
-  "Raka Prakoso",
-  "Sari Winata",
-  "Taufik Hidayat",
-  "Usman Halim",
-  "Vera Damayanti",
-  "Wahyu Saputra",
-  "Yani Marlina",
-  "Zaki Kurniawan",
-];
-
-const subjectCombos: string[][] = [
-  ["Math 01"],
-  ["English 01"],
-  ["Math 01", "Physics 01"],
-  ["Biology 01"],
-  ["Chemistry 01"],
-  ["Programming 01"],
-  ["Programming 02"],
-  ["Design 01"],
-  ["Art 01"],
-  ["Math 02", "English 02"],
-];
-
-const homeroomPool: Array<string | null> = [
-  "VII-A",
-  "VII-B",
-  "VIII-A",
-  "VIII-B",
-  "IX-A",
-  "IX-B",
-  null,
-  null,
-];
-
-const slugifyName = (name: string, fallback: string) => {
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ".")
-    .replace(/(^\.+|\.+$)/g, "");
-  return slug || fallback;
-};
-
-const buildTeachers = (): TeacherRow[] => {
-  const rows: TeacherRow[] = [...leadingRows, ...featuredRows];
-  let i = 0;
-  while (rows.length < 25) {
-    const name = extraNames[i % extraNames.length];
-    const subjects = subjectCombos[i % subjectCombos.length];
-    const homeroom = homeroomPool[i % homeroomPool.length] ?? null;
-    const id = (640000 + i * 7).toString().padStart(6, "0");
-    rows.push({
-      id,
-      fullName: name,
-      email: `${slugifyName(name, `teacher${i}`)}@schoolmail.id`,
-      subjects,
-      homeroomClass: homeroom,
-      status: i % 6 === 0 ? "Non Active" : "Active",
-    });
-    i += 1;
-  }
-  return rows;
-};
+const TEACHER_LIST_PATH = "/master-data/teachers-management/teacher-detail";
 
 const columns: Array<{ key: keyof TeacherRow | "action"; label: string }> = [
   { key: "id", label: "Teacher ID" },
@@ -206,7 +55,7 @@ const TeacherManagementPage: React.FC = () => {
     direction: "asc",
   });
 
-  const teachers = useMemo(() => buildTeachers(), []);
+  const teachers = useMemo(() => getTeacherList(), []);
   const normalizedQuery = query.trim().toLowerCase();
 
   const filteredTeachers = useMemo(() => {
@@ -296,6 +145,45 @@ const TeacherManagementPage: React.FC = () => {
     setShowFilter(false);
     setPage(1);
   };
+
+  const handleDownload = useCallback(() => {
+    if (!sortedTeachers.length) {
+      return;
+    }
+
+    const header = columns
+      .filter((column) => column.key !== "action")
+      .map((column) => column.label);
+
+    const rows = sortedTeachers.map((row) => [
+      row.id,
+      row.fullName,
+      row.email,
+      row.subjects.join('; '),
+      row.homeroomClass ?? '',
+      row.status,
+    ]);
+
+    const escapeCell = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const csv = [header, ...rows]
+      .map((line) => line.map((cell) => escapeCell(String(cell))).join(','))
+      .join('\r\n');
+
+    const blob = new Blob(['﻿' + csv], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute(
+      'download',
+      `teacher-data-${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    document.body.append(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [sortedTeachers]);
 
   const router = useRouter();
 
@@ -436,6 +324,7 @@ const TeacherManagementPage: React.FC = () => {
                   {/* RIGHT: Download Button */}
                   <button
                     type="button"
+                    onClick={handleDownload}
                     className="inline-flex items-center gap-2 rounded-full border border-gray-300 px-5 py-2 text-sm font-semibold text-[#6c2bd9] transition-colors hover:border-[#6c2bd9]/60 hover:text-[#581c87]"
                   >
                     <Download className="w-4 h-4" />
@@ -506,7 +395,7 @@ const TeacherManagementPage: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  console.log("Edit teacher", row.id)
+                                  router.push(`${TEACHER_LIST_PATH}/${row.id}/edit`)
                                 }
                                 className="rounded-md p-2 text-[#6c2bd9] transition-colors hover:bg-purple-50"
                                 aria-label={`Edit ${row.fullName}`}
@@ -516,7 +405,7 @@ const TeacherManagementPage: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  console.log("View teacher", row.id)
+                                  router.push(`${TEACHER_LIST_PATH}/${row.id}`)
                                 }
                                 className="rounded-md p-2 text-[#6c2bd9] transition-colors hover:bg-purple-50"
                                 aria-label={`View ${row.fullName}`}

@@ -17,6 +17,8 @@ import {
 
 const inter = Inter({ subsets: ["latin"] });
 
+const TEACHER_LIST_PATH = "/master-data/teachers-management/teacher-list";
+
 const subjectOptions = [
   "Math 01",
   "Math 02",
@@ -104,16 +106,22 @@ const AddTeacherPage: React.FC = () => {
       password,
       phone: `${phonePrefix} ${phoneNumber}`.trim(),
       subjects: chosenSubjects,
+      createdAt: Date.now(),
     };
+    // persist locally (mock)
+    const KEY = "teachers";
+    const prev = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    localStorage.setItem(KEY, JSON.stringify([...prev, payload]));
+    
     console.log("Saving teacher", payload);
     setModalOpen(false);
+    router.push(TEACHER_LIST_PATH);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
     resetForm();
   };
 
   return (
-    
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
       <div className="flex">
         <Sidebar
@@ -144,7 +152,9 @@ const AddTeacherPage: React.FC = () => {
               <div className="flex items-center gap-4">
                 <button
                   type="button"
-                  onClick={() => router.push("/master-data/teachers-management/teacher-list")}
+                  onClick={() =>
+                    router.push(TEACHER_LIST_PATH)
+                  }
                   aria-label="Back to teacher list"
                   className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition-colors hover:border-[#6c2bd9] hover:text-[#6c2bd9]"
                 >
