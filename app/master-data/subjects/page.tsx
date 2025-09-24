@@ -332,6 +332,7 @@ const SubjectManagementPage: React.FC = () => {
                               </button>
                               <button
                                 type="button"
+                                onClick={() => router.push(`/master-data/subjects/subject-detail?code=${encodeURIComponent(row.code)}`)}
                                 className="rounded-md p-2 text-[#6c2bd9] transition hover:bg-purple-50"
                                 aria-label={`View ${row.name}`}
                               >
