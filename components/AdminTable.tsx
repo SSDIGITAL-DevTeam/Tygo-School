@@ -1,8 +1,19 @@
 "use client";
-import React, { useMemo, useState } from "react";
-import Pagination from "./Pagination";
-import { Search, Download, ChevronDown, ChevronUp, Eye, Pencil, UserPlus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import {
+  Filter,
+  Search,
+  Download,
+  UserPlus,
+  ArrowUpDown,
+  Eye,
+  Pencil,
+  ChevronsLeft,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsRight,
+} from "lucide-react";
 
 export type SortKey = "name" | "email" | "role" | "features" | "status";
 export type SortDir = "asc" | "desc";
@@ -16,236 +27,273 @@ export type AdminRow = {
   status: "Active" | "Non Active";
 };
 
-export type AdminTableProps = {
+type AdminTableProps = {
   data: AdminRow[];
-  query: string;
-  filterRole: AdminRow["role"] | "All Roles";
-  filterStatus: AdminRow["status"] | "All Status";
-  sortKey: SortKey;
-  sortDir: SortDir;
-  page: number;
-  pageSize: number;
-  onSortChange: (key: SortKey) => void;
-  onPageChange: (page: number) => void;
-  onPageSizeChange?: (size: number) => void;
-  onEdit?: (row: AdminRow) => void;
-  onView?: (row: AdminRow) => void;
-  // Additional helpers for controls
-  onQueryChange?: (q: string) => void;
-  onFilterRoleChange?: (r: AdminTableProps["filterRole"]) => void;
-  onFilterStatusChange?: (s: AdminTableProps["filterStatus"]) => void;
 };
 
-// Utility: export current rows to CSV
-function toCSV(rows: AdminRow[]) {
-  const header = ["Admin Name", "Email", "Role Name", "Accessible Features", "Status"];
-  const body = rows.map((r) => [r.name, r.email, r.role, r.features, r.status]);
-  const csv = [header, ...body]
-    .map((line) => line.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+// Utility to export current list to CSV file
+const exportToCsv = (rows: AdminRow[]) => {
+  const headers = ["Admin Name", "Email", "Role Name", "Accessible Features", "Status"];
+  const lines = rows.map((row) => [row.name, row.email, row.role, `${row.features}`, row.status]);
+  const csv = [headers, ...lines]
+    .map((line) => line.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
     .join("\n");
-  const dt = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const fname = `admins_${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}_${pad(dt.getHours())}${pad(dt.getMinutes())}.csv`;
+  const timestamp = new Date();
+  const pad = (v: number) => `${v}`.padStart(2, "0");
+  const fileName = `admin-list_${timestamp.getFullYear()}${pad(timestamp.getMonth() + 1)}${pad(timestamp.getDate())}_${pad(
+    timestamp.getHours(),
+  )}${pad(timestamp.getMinutes())}.csv`;
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-}
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+};
 
-const roles: (AdminRow["role"] | "All Roles")[] = [
-  "All Roles",
-  "Admin",
-  "Secondary Admin",
-  "Subjects and Teachers Admin",
-  "Students Report Admin",
-];
-
-const statuses: (AdminRow["status"] | "All Status")[] = ["All Status", "Active", "Non Active"];
-
-// Admin table with header controls, sorting, and pagination
-const AdminTable: React.FC<AdminTableProps> = (props) => {
-  const router = useRouter();
+const AdminTable: React.FC<AdminTableProps> = ({ data }) => {
+  // Filter, search, sort & pagination state
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Non Active">("All");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [page, setPage] = useState(2);
+  const [pageSize, setPageSize] = useState(4);
   const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement | null>(null);
 
-  // Pipeline: filter → search → sort → paginate
+  // Close filter dropdown on outside click
+  useEffect(() => {
+    if (!filterOpen) return;
+    const handler = (event: MouseEvent) => {
+      if (!filterRef.current) return;
+      if (!filterRef.current.contains(event.target as Node)) setFilterOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [filterOpen]);
+
+  // Derived dataset after filter, search, sort
   const filtered = useMemo(() => {
-    let rows = [...props.data];
-    if (props.filterRole !== "All Roles") rows = rows.filter((r) => r.role === props.filterRole);
-    if (props.filterStatus !== "All Status") rows = rows.filter((r) => r.status === props.filterStatus);
-    const q = props.query.trim().toLowerCase();
-    if (q) rows = rows.filter((r) => `${r.name} ${r.email}`.toLowerCase().includes(q));
+    let rows = [...data];
+    if (statusFilter !== "All") rows = rows.filter((row) => row.status === statusFilter);
+    const q = query.trim().toLowerCase();
+    if (q) rows = rows.filter((row) => `${row.name} ${row.email}`.toLowerCase().includes(q));
     rows.sort((a, b) => {
-      const key = props.sortKey;
-      const va = a[key] as any;
-      const vb = b[key] as any;
-      let cmp = 0;
-      if (typeof va === "number" && typeof vb === "number") cmp = va - vb;
-      else cmp = String(va).localeCompare(String(vb), undefined, { numeric: true });
-      return props.sortDir === "asc" ? cmp : -cmp;
+      const left = a[sortKey] as unknown;
+      const right = b[sortKey] as unknown;
+      let comparison = 0;
+      if (typeof left === "number" && typeof right === "number") comparison = left - right;
+      else comparison = String(left).localeCompare(String(right), undefined, { numeric: true });
+      return sortDir === "asc" ? comparison : -comparison;
     });
     return rows;
-  }, [props.data, props.filterRole, props.filterStatus, props.query, props.sortKey, props.sortDir]);
+  }, [data, query, sortKey, sortDir, statusFilter]);
 
   const total = filtered.length;
-  const pageCount = Math.max(1, Math.ceil(total / props.pageSize));
-  const page = Math.min(props.page, pageCount);
-  const paged = filtered.slice((page - 1) * props.pageSize, page * props.pageSize);
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  const headerCell = (key: SortKey, label: string) => (
-    <th key={key} className="text-left py-2 px-3">
-      <button
-        onClick={() => props.onSortChange(key)}
-        aria-sort={props.sortKey === key ? (props.sortDir === "asc" ? "ascending" : "descending") : "none"}
-        className="inline-flex items-center gap-1 text-sm font-semibold text-violet-700 hover:underline"
-        aria-label={`Sort by ${label}`}
-      >
-        <span>{label}</span>
-        {props.sortKey === key ? (
-          props.sortDir === "asc" ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />
-        ) : (
-          <span className="text-xs text-gray-400">—</span>
-        )}
-      </button>
-    </th>
-  );
+  useEffect(() => {
+    if (page > pageCount) setPage(pageCount);
+  }, [page, pageCount]);
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const changeStatusFilter = (value: "All" | "Active" | "Non Active") => {
+    setStatusFilter(value);
+    setFilterOpen(false);
+    setPage(1);
+  };
+
+  const paginationItems = useMemo(() => {
+    const numbers: number[] = [];
+    numbers.push(1);
+    for (let i = currentPage - 1; i <= currentPage + 1; i += 1) if (i > 1 && i < pageCount) numbers.push(i);
+    if (pageCount > 1) numbers.push(pageCount);
+    const unique = Array.from(new Set(numbers)).sort((a, b) => a - b);
+    const items: (number | "ellipsis")[] = [];
+    unique.forEach((num, idx) => {
+      const previous = unique[idx - 1];
+      if (idx > 0 && previous !== undefined && num - previous > 1) items.push("ellipsis");
+      items.push(num);
+    });
+    return items;
+  }, [currentPage, pageCount]);
+
+  const goToPage = (next: number) => {
+    const target = Math.min(Math.max(1, next), pageCount);
+    setPage(target);
+  };
+
+  const statusOptions: ("All" | "Active" | "Non Active")[] = ["All", "Active", "Non Active"];
 
   return (
-    <div className="rounded-2xl bg-white shadow-md border border-gray-200">
-      {/* Card header: filter + search (left), actions (right) */}
-      <div className="p-4 sm:p-5 border-b border-gray-200">
-        <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-          <div className="flex-1 flex flex-col sm:flex-row gap-3">
-            {/* Filter button with popover */}
-            <div className="relative">
-              <button
-                aria-haspopup="menu"
-                aria-expanded={filterOpen}
-                onClick={() => setFilterOpen((v) => !v)}
-                className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
-              >
-                <span>Filter</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
-              {filterOpen && (
-                <div role="menu" className="absolute z-10 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-md p-3 space-y-3">
-                  {/* Role group */}
-                  <div>
-                    <div className="text-xs font-semibold text-gray-500 mb-1">Role</div>
-                    <select
-                      aria-label="Filter by role"
-                      value={props.filterRole}
-                      onChange={(e) => props.onFilterRoleChange?.(e.target.value as any)}
-                      className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
-                    >
-                      {roles.map((r) => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {/* Status group */}
-                  <div>
-                    <div className="text-xs font-semibold text-gray-500 mb-1">Status</div>
-                    <select
-                      aria-label="Filter by status"
-                      value={props.filterStatus}
-                      onChange={(e) => props.onFilterStatusChange?.(e.target.value as any)}
-                      className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
-                    >
-                      {statuses.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Search */}
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  aria-label="Search Here"
-                  value={props.query}
-                  onChange={(e) => props.onQueryChange?.(e.target.value)}
-                  placeholder="Search Here"
-                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
-                />
+    <section className="rounded-2xl bg-white p-6 shadow-md ring-1 ring-slate-200">
+      {/* Toolbar with filter, search, actions */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative" ref={filterRef}>
+            <button
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded={filterOpen}
+              onClick={() => setFilterOpen((open) => !open)}
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition active:scale-95 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+            >
+              <Filter className="h-4 w-4 text-slate-500" aria-hidden />
+              <span>Filter</span>
+            </button>
+            {filterOpen && (
+              <div role="menu" className="absolute z-30 mt-2 w-40 rounded-lg border border-slate-200 bg-white p-2 shadow-lg">
+                {statusOptions.map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => changeStatusFilter(value)}
+                    className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm ${
+                      statusFilter === value ? "bg-violet-50 text-violet-700" : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>{value === "All" ? "All Status" : value}</span>
+                    {statusFilter === value && <span className="text-xs font-semibold">Selected</span>}
+                  </button>
+                ))}
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-2 sm:justify-end">
-            <button
-              className="inline-flex items-center gap-2 rounded-md bg-[#6c2bd9] text-white px-3 py-2 text-sm font-semibold active:scale-[0.98] hover:bg-[#5a23b8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6c2bd9]"
-              aria-label="Add Admin"
-              onClick={() => router.push("/role-access/add-admin")}
-            >
-              <UserPlus className="w-4 h-4" />
-              <span>Add Admin</span>
-            </button>
-            <button
-              className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
-              aria-label="Download Data"
-              onClick={() => toCSV(filtered)}
-            >
-              <Download className="w-4 h-4" />
-              <span>Download Data</span>
-            </button>
+          <div className="relative w-full max-w-md">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
+            <input
+              role="searchbox"
+              aria-label="Search Here"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(1);
+              }}
+              placeholder="Search Here"
+              className="w-full rounded-md border border-slate-300 pl-9 pr-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-300"
+            />
           </div>
+        </div>
+
+        <div className="flex items-center gap-3 sm:justify-end">
+          <Link
+            href="/role-access/admin-list/add-admin"
+            className="inline-flex items-center gap-2 rounded-full bg-violet-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition active:scale-95 hover:bg-violet-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+          >
+            <UserPlus className="h-4 w-4" aria-hidden />
+            <span>Add Admin</span>
+          </Link>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm transition active:scale-95 hover:bg-slate-50"
+            aria-label="Download Data"
+            onClick={() => exportToCsv(filtered)}
+          >
+            <Download className="h-4 w-4" aria-hidden />
+            <span>Download Data</span>
+          </button>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="p-4 sm:p-5 overflow-x-auto">
-        <table className="w-full min-w-[800px] text-sm">
+      {/* Admin list table */}
+      <div className="mt-4 overflow-x-auto">
+        <table className="min-w-full table-auto text-sm text-slate-800">
           <thead>
-            <tr>
-              {headerCell("name", "Admin Name")}
-              {headerCell("email", "Email")}
-              {headerCell("role", "Role Name")}
-              {headerCell("features", "Accessible Features")}
-              {headerCell("status", "Status")}
-              <th className="text-left py-2 px-3 text-sm font-semibold text-violet-700">Action</th>
+            <tr className="border-b border-slate-200">
+              <th className="px-2 py-3 text-left font-semibold text-violet-700 md:px-3">
+                <button
+                  type="button"
+                  onClick={() => toggleSort("name")}
+                  aria-label="Sort by admin name"
+                  className="inline-flex items-center gap-2"
+                >
+                  <span>Admin Name</span>
+                  <ArrowUpDown className={`h-4 w-4 ${sortKey === "name" ? "text-violet-600" : "text-slate-400"}`} aria-hidden />
+                </button>
+              </th>
+              <th className="px-2 py-3 text-left font-semibold text-violet-700 md:px-3">
+                <span>Email</span>
+              </th>
+              <th className="px-2 py-3 text-left font-semibold text-violet-700 md:px-3">
+                <button
+                  type="button"
+                  onClick={() => toggleSort("role")}
+                  aria-label="Sort by role name"
+                  className="inline-flex items-center gap-2"
+                >
+                  <span>Role Name</span>
+                  <ArrowUpDown className={`h-4 w-4 ${sortKey === "role" ? "text-violet-600" : "text-slate-400"}`} aria-hidden />
+                </button>
+              </th>
+              <th className="px-2 py-3 text-left font-semibold text-violet-700 md:px-3">
+                <button
+                  type="button"
+                  onClick={() => toggleSort("features")}
+                  aria-label="Sort by accessible features"
+                  className="inline-flex items-center gap-2"
+                >
+                  <span>Accessible Features</span>
+                  <ArrowUpDown className={`h-4 w-4 ${sortKey === "features" ? "text-violet-600" : "text-slate-400"}`} aria-hidden />
+                </button>
+              </th>
+              <th className="px-2 py-3 text-left font-semibold text-violet-700 md:px-3">
+                <button
+                  type="button"
+                  onClick={() => toggleSort("status")}
+                  aria-label="Sort by status"
+                  className="inline-flex items-center gap-2"
+                >
+                  <span>Status</span>
+                  <ArrowUpDown className={`h-4 w-4 ${sortKey === "status" ? "text-violet-600" : "text-slate-400"}`} aria-hidden />
+                </button>
+              </th>
+              <th className="px-2 py-3 text-left font-semibold text-violet-700 md:px-3">Action</th>
             </tr>
           </thead>
           <tbody>
-            {paged.map((r, idx) => (
-              <tr key={`${r.email}-${idx}`} className="hover:bg-slate-50">
-                <td className="px-3 py-2 text-gray-800">{r.name}</td>
-                <td className="px-3 py-2 text-gray-800">{r.email}</td>
-                <td className="px-3 py-2 text-gray-800">{r.role}</td>
-                <td className="px-3 py-2 text-gray-800">{r.features}</td>
-                <td className="px-3 py-2">
-                  {r.status === "Active" ? (
+            {paged.map((row) => (
+              <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50">
+                <td className="px-2 py-3 text-slate-800 md:px-3">{row.name}</td>
+                <td className="px-2 py-3 text-slate-800 md:px-3">{row.email}</td>
+                <td className="px-2 py-3 text-slate-800 md:px-3">{row.role}</td>
+                <td className="px-2 py-3 text-slate-800 md:px-3">{row.features} Features</td>
+                <td className="px-2 py-3 md:px-3">
+                  {row.status === "Active" ? (
                     <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">Active</span>
                   ) : (
                     <span className="inline-flex items-center rounded-md bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/20">Non Active</span>
                   )}
                 </td>
-                <td className="px-3 py-2">
+                <td className="px-2 py-3 md:px-3">
                   <div className="flex items-center gap-2">
-                    <button
-                      aria-label={`View ${r.name}`}
-                      onClick={() => {
-                        if (props.onView) return props.onView(r);
-                        router.push(`/role-access/admin-list/${encodeURIComponent(r.id)}`);
-                      }}
-                      className="p-2 rounded-md hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
+                    <Link
+                      href={`/role-access/admin-list/${encodeURIComponent(row.id)}`}
+                      aria-label={`View admin ${row.name}`}
+                      className="rounded-md p-1 text-violet-700 transition hover:bg-violet-50 hover:text-violet-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                     >
-                      <Eye className="w-4 h-4 text-[#6c2bd9]" />
-                    </button>
-                    <button
-                      aria-label={`Edit ${r.name}`}
-                      onClick={() => {
-                        if (props.onEdit) return props.onEdit(r);
-                        router.push(`/role-access/admin-list/${encodeURIComponent(r.id)}/edit`);
-                      }}
-                      className="p-2 rounded-md hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
+                      <Eye className="h-4 w-4" aria-hidden />
+                    </Link>
+                    <Link
+                      href={`/role-access/admin-list/${encodeURIComponent(row.id)}/edit`}
+                      aria-label={`Edit admin ${row.name}`}
+                      className="rounded-md p-1 text-violet-700 transition hover:bg-violet-50 hover:text-violet-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                     >
-                      <Pencil className="w-4 h-4 text-[#6c2bd9]" />
-                    </button>
+                      <Pencil className="h-4 w-4" aria-hidden />
+                    </Link>
                   </div>
                 </td>
               </tr>
@@ -254,25 +302,106 @@ const AdminTable: React.FC<AdminTableProps> = (props) => {
         </table>
       </div>
 
-      {/* Footer with page size + pagination */}
-      <div className="px-4 sm:px-5 pb-4 sm:pb-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="text-sm text-gray-700 flex items-center gap-2">
+      {/* Table footer with page size & pagination */}
+      <div className="mt-6 flex flex-col gap-4 border-t border-slate-200 pt-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-2 text-sm text-slate-600">
           <span>Showing</span>
           <select
             aria-label="Rows per page"
-            value={props.pageSize}
-            onChange={(e) => props.onPageSizeChange?.(Number(e.target.value))}
-            className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
+            value={pageSize}
+            onChange={(event) => {
+              setPageSize(Number(event.target.value));
+              setPage(1);
+            }}
+            className="h-8 rounded-md border border-slate-300 px-2 text-sm focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-300"
           >
-            {[4, 10, 25].map((n) => (
-              <option key={n} value={n}>{n}</option>
+            {[4, 10, 25].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
             ))}
           </select>
           <span>from {total} data</span>
         </div>
-        <Pagination page={page} pageCount={pageCount} onPageChange={props.onPageChange} />
+
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <div className="inline-flex items-center gap-1">
+            <button
+              type="button"
+              aria-label="First page"
+              onClick={() => goToPage(1)}
+              disabled={currentPage === 1}
+              className="min-w-[32px] h-8 rounded-md border border-slate-300 bg-white px-2 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronsLeft className="h-4 w-4" aria-hidden />
+            </button>
+            <button
+              type="button"
+              aria-label="Previous page"
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="min-w-[32px] h-8 rounded-md border border-slate-300 bg-white px-2 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden />
+            </button>
+            {paginationItems.map((item, idx) =>
+              item === "ellipsis" ? (
+                <span key={`ellipsis-${idx}`} className="px-2 text-slate-400">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={item}
+                  type="button"
+                  aria-current={item === currentPage ? "page" : undefined}
+                  onClick={() => goToPage(item)}
+                  className={`min-w-[32px] h-8 rounded-full border px-3 transition ${
+                    item === currentPage
+                      ? "border-transparent bg-violet-700 text-white"
+                      : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {item}
+                </button>
+              )
+            )}
+            <button
+              type="button"
+              aria-label="Next page"
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === pageCount}
+              className="min-w-[32px] h-8 rounded-md border border-slate-300 bg-white px-2 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </button>
+            <button
+              type="button"
+              aria-label="Last page"
+              onClick={() => goToPage(pageCount)}
+              disabled={currentPage === pageCount}
+              className="min-w-[32px] h-8 rounded-md border border-slate-300 bg-white px-2 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronsRight className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 text-slate-500">
+            <input
+              type="text"
+              inputMode="numeric"
+              disabled
+              className="h-8 w-12 rounded-md border border-slate-300 bg-slate-100 text-center text-sm"
+              value="--"
+              aria-label="Go to page"
+            />
+            <span className="inline-flex items-center gap-1 font-medium text-slate-600">
+              Go
+              <ChevronsRight className="h-4 w-4" aria-hidden />
+            </span>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 
