@@ -6,6 +6,8 @@ import Sidebar from "../../../../components/admin/Sidebar";
 import Header from "../../../../components/layout-global/Header";
 import Pagination from "../../../../components/layout-global/Pagination";
 import StatusBadge from "../../../../components/layout-global/StatusBadge";
+import EditAction from "@/components/layout-global/EditAction";
+import ViewAction from "@/components/layout-global/ViewAction";
 import { useRouter } from "next/navigation";
 import {
   ArrowUpDown,
@@ -166,6 +168,7 @@ const ClassManagementPage: React.FC = () => {
   );
 
   const router = useRouter();
+  const CLASSES_BASE = "/admin/master-data/classes";
 
   return (
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
@@ -203,7 +206,7 @@ const ClassManagementPage: React.FC = () => {
                     Class List
                   </h2>
                   <div className="flex flex-col gap-3 sm:flex-row">
-                    
+
                     <div className="flex justify-end">
                       <AddButton entity="Class" href="/admin/master-data/classes/add-class" />
                       {/* Renders: “Add Role” with the purple pill styling */}
@@ -328,27 +331,16 @@ const ClassManagementPage: React.FC = () => {
                             </td>
                             <td className="px-3 py-3">
                               <div className="flex items-center justify-center gap-2">
-                                <button
-                                  type="button"
-                                  className="rounded-md p-2 text-[#6c2bd9] transition hover:bg-purple-50"
-                                  aria-label={`Edit ${row.name}`}
-                                >
-                                  <PenSquare className="h-4 w-4" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    router.push(
-                                      `/master-data/classes/class-detail?name=${encodeURIComponent(
-                                        row.name
-                                      )}`
-                                    )
-                                  }
-                                  className="rounded-md p-2 text-[#6c2bd9] transition hover:bg-purple-50"
-                                  aria-label={`View ${row.name}`}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </button>
+                                <EditAction
+                                  href={`${CLASSES_BASE}/${encodeURIComponent(row.name)}/edit`}
+                                  title={`Edit ${row.name}`}
+                                />
+
+                                {/* Kanan: View -> /admin/master-data/classes/class-detail?name={name} */}
+                                <ViewAction
+                                  href={`${CLASSES_BASE}/class-detail?name=${encodeURIComponent(row.name)}`}
+                                  title={`View ${row.name}`}
+                                />
                               </div>
                             </td>
                           </tr>

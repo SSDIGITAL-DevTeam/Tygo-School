@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Sidebar from "../../../../../components/admin/Sidebar";
 import Header from "../../../../../components/layout-global/Header";
-import ConfirmModal from "../../../../../components/modal/AddTeacherModal";
+import ConfirmModal from "../../../../../components/admin/modal/AddTeacherModal";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import {

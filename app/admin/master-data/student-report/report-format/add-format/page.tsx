@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import AddAssessmentGroupModal from "../../../../../../components/modal/AddAssessmentGroupModal";
+import AddAssessmentGroupModal from "../../../../../../components/admin/modal/AddAssessmentGroupModal";
 import { ArrowLeft, Plus, Save } from "lucide-react";
 
 type FormState = {
