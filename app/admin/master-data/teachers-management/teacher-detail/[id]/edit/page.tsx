@@ -19,6 +19,7 @@ import {
   SUBJECT_OPTIONS,
   TeacherStatus,
 } from "@/app/admin/master-data/teachers-management/teacher-data";
+import SaveButton from "@/components/layout-global/SaveButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -334,12 +335,7 @@ const TeacherEditPage: React.FC = () => {
                 </div>
 
                 <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#581c87]"
-                  >
-                    Save Data
-                  </button>
+                  <SaveButton />
                 </div>
               </form>
             </section>

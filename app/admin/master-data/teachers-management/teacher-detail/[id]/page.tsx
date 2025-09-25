@@ -9,6 +9,8 @@ import ConfirmDialog from "../../../../../../components/layout-global/ConfirmDia
 import Link from "next/link";
 import { ArrowLeft, BookOpen, Trash2 } from "lucide-react";
 import { formatTeacherPhone, getTeacherById } from "../../teacher-data";
+import DeleteButton from "@/components/layout-global/DeleteButton";
+import EditButton from "@/components/layout-global/EditButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -137,19 +139,15 @@ const TeacherDetailPage: React.FC = () => {
             </section>
 
             <div className="flex justify-end gap-3">
-              <button
-                type="button"
+              
+              <DeleteButton
                 onClick={() => setConfirmOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-600"
-              >
-                <Trash2 className="h-4 w-4" /> Delete Data
-              </button>
-              <Link
-                href={`${TEACHER_LIST_PATH}/${encodeURIComponent(id)}/edit`}
-                className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-500"
-              >
-                Edit Data
-              </Link>
+                label="Delete Data"
+              />
+              <EditButton
+                onClick={() => router.push(`${TEACHER_LIST_PATH}/${encodeURIComponent(id)}/edit`)}
+                label="Edit Data"
+              />
             </div>
           </main>
         </div>
