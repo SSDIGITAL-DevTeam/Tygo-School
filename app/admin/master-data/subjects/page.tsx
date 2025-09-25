@@ -28,6 +28,7 @@ import {
 import AddButton from "@/components/layout-global/AddButton";
 import EditAction from "@/components/layout-global/EditAction";
 import ViewAction from "@/components/layout-global/ViewAction";
+import DownloadButton from "@/components/layout-global/DownloadButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -132,6 +133,7 @@ const SubjectManagementPage: React.FC = () => {
     },
     []
   );
+  
 
     const SUBJECTS_BASE = "/admin/master-data/subjects";
 
@@ -229,13 +231,7 @@ const SubjectManagementPage: React.FC = () => {
                   </div>
 
                   {/* Download di kanan */}
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 whitespace-nowrap"
-                  >
-                    <Download className="h-4 w-4 shrink-0" />
-                    Download Data
-                  </button>
+                  <DownloadButton label="Download Data" />
                 </div>
 
                 <div className="overflow-hidden rounded-2xl border border-gray-200">

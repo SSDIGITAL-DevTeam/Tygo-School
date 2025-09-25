@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 
 import { getTeacherList, TeacherRecord } from "./teacher-data";
+import DownloadButton from "@/components/layout-global/DownloadButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -304,14 +305,7 @@ const TeacherManagementPage: React.FC = () => {
                   </div>
 
                   {/* RIGHT: Download */}
-                  <button
-                    type="button"
-                    onClick={handleDownload}
-                    className="inline-flex items-center gap-2 rounded-full border border-gray-300 px-5 py-2 text-sm font-semibold text-[#6c2bd9] transition-colors hover:border-[#6c2bd9]/60 hover:text-[#581c87]"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download Data
-                  </button>
+                  <DownloadButton label="Download Data" />
                 </div>
 
                 <div className="overflow-x-auto">
