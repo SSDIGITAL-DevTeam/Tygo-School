@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react"; // ← +useEffect (opsional)
+import React, { useMemo, useState, useEffect } from "react";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../../../../components/admin/Sidebar";
 import Header from "../../../../../components/layout-global/Header";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import SaveButton from "@/components/layout-global/SaveButton";
-import AddSubjectModal from "@/components/admin/modal/AddModal"; // ← IMPORT MODAL
+import AddSubjectModal from "@/components/admin/modal/AddModal";
 
 type FieldState = {
   subjectCode: string;
@@ -17,63 +17,17 @@ type FieldState = {
 
 const inter = Inter({ subsets: ["latin"] });
 
-const initialState: FieldState = {
-  subjectCode: "",
-  subjectName: "",
-  description: "",
-};
-
-const AddSubjectPage: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [form, setForm] = useState<FieldState>(initialState);
-
-  // ← STATE MODAL
-  const [showAddModal, setShowAddModal] = useState(false);
-
-  const router = useRouter();
-
-  const isDirty = useMemo(() => {
-    return (
-      form.subjectCode.trim() !== "" ||
-      form.subjectName.trim() !== "" ||
-      form.description.trim() !== ""
-    );
-  }, [form]);
-
-  const handleChange =
-    (field: keyof FieldState) =>
-    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((prev) => ({ ...prev, [field]: event.target.value }));
-    };
-
-  // Logic “simpan” ketika user KONFIRM di modal
-  const doSave = () => {
-    // TODO: integrate with backend
-    // contoh mock simpan:
-    console.log("Saving subject:", form);
-    setShowAddModal(false);
-    alert("Subject has been saved (mock).");
-    // reset form (opsional)
-    // setForm(initialState);
-    // router.push("/master-data/subjects");
-  };
-
-  // (Opsional) kunci scroll saat modal terbuka
-  useEffect(() => {
-    if (!showAddModal) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [showAddModal]);
-
-  // Komponen baris form
-  const FormRow: React.FC<{
-    label: string;
-    required?: boolean;
-    input: React.ReactNode;
-  }> = ({ label, required, input }) => (
+/* ---------- MOVE FormRow OUTSIDE the component ---------- */
+const FormRow = React.memo(function FormRow({
+  label,
+  required,
+  input,
+}: {
+  label: string;
+  required?: boolean;
+  input: React.ReactNode;
+}) {
+  return (
     <div className="grid grid-cols-1 items-center gap-3 py-3 md:grid-cols-[220px_minmax(0,1fr)]">
       <label className="flex items-center justify-end pr-3 text-sm font-medium text-gray-700">
         <span className="text-gray-700">
@@ -85,6 +39,49 @@ const AddSubjectPage: React.FC = () => {
       <div className="min-w-0">{input}</div>
     </div>
   );
+});
+/* -------------------------------------------------------- */
+
+const initialState: FieldState = {
+  subjectCode: "",
+  subjectName: "",
+  description: "",
+};
+
+const AddSubjectPage: React.FC = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [form, setForm] = useState<FieldState>(initialState);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const router = useRouter();
+
+  const isDirty = useMemo(
+    () =>
+      form.subjectCode.trim() !== "" ||
+      form.subjectName.trim() !== "" ||
+      form.description.trim() !== "",
+    [form]
+  );
+
+  const handleChange =
+    (field: keyof FieldState) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setForm((prev) => ({ ...prev, [field]: event.target.value }));
+    };
+
+  const doSave = () => {
+    console.log("Saving subject:", form);
+    setShowAddModal(false);
+    alert("Subject has been saved (mock).");
+  };
+
+  useEffect(() => {
+    if (!showAddModal) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [showAddModal]);
 
   return (
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
@@ -119,11 +116,7 @@ const AddSubjectPage: React.FC = () => {
                 <h1 className="text-xl font-semibold text-gray-900">Add Subject</h1>
               </div>
 
-              {/* Form tidak submit langsung; Save memicu modal */}
-              <form
-                onSubmit={(e) => e.preventDefault()}
-                className="px-6 pb-8 pt-6"
-              >
+              <form onSubmit={(e) => e.preventDefault()} className="px-6 pb-8 pt-6">
                 <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                   <div className="h-3 -mx-6 -mt-6 mb-6 rounded-t-2xl bg-gray-100" />
 
@@ -174,7 +167,6 @@ const AddSubjectPage: React.FC = () => {
                       }
                     />
 
-                    {/* Tombol Save: buka modal */}
                     <div className="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]">
                       <div className="hidden md:block" />
                       <div className="mt-2 flex justify-end">
@@ -193,7 +185,6 @@ const AddSubjectPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal konfirmasi Add Subject */}
       <AddSubjectModal
         open={showAddModal}
         msg={"subject"}
