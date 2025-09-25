@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Pagination from "../../../../../components/layout-global/Pagination";
 import { getClassDetailByName, StudentFlagColor } from "../class-data";
+import DeleteModal from "@/components/admin/modal/DeleteModal"; // <-- sesuaikan path bila perlu
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,6 +44,9 @@ const ClassDetailPage: React.FC = () => {
   const [studentPageSize, setStudentPageSize] = useState(4);
   const [studentPage, setStudentPage] = useState(1);
 
+  // Modal delete
+  const [openDelete, setOpenDelete] = useState(false);
+
   const classNameParam = params.get("name");
   const classDetail = useMemo(
     () => getClassDetailByName(classNameParam),
@@ -54,9 +58,7 @@ const ClassDetailPage: React.FC = () => {
 
   const filteredReports = useMemo(() => {
     const normalized = reportQuery.trim().toLowerCase();
-    if (!normalized) {
-      return classDetail.reportFormats;
-    }
+    if (!normalized) return classDetail.reportFormats;
     return classDetail.reportFormats.filter((item) =>
       item.title.toLowerCase().includes(normalized),
     );
@@ -64,9 +66,7 @@ const ClassDetailPage: React.FC = () => {
 
   const filteredSubjects = useMemo(() => {
     const normalized = subjectQuery.trim().toLowerCase();
-    if (!normalized) {
-      return classDetail.subjects;
-    }
+    if (!normalized) return classDetail.subjects;
     return classDetail.subjects.filter((subject) => {
       const haystack = `${subject.code} ${subject.name} ${subject.description}`.toLowerCase();
       return haystack.includes(normalized);
@@ -75,9 +75,7 @@ const ClassDetailPage: React.FC = () => {
 
   const filteredStudents = useMemo(() => {
     const normalized = studentQuery.trim().toLowerCase();
-    if (!normalized) {
-      return classDetail.students;
-    }
+    if (!normalized) return classDetail.students;
     return classDetail.students.filter((student) => {
       const email = student.email ?? "";
       const haystack = `${student.id} ${student.name} ${email} ${student.currentClass}`.toLowerCase();
@@ -96,15 +94,11 @@ const ClassDetailPage: React.FC = () => {
   );
 
   useEffect(() => {
-    if (subjectPage > subjectPageCount) {
-      setSubjectPage(subjectPageCount);
-    }
+    if (subjectPage > subjectPageCount) setSubjectPage(subjectPageCount);
   }, [subjectPage, subjectPageCount]);
 
   useEffect(() => {
-    if (studentPage > studentPageCount) {
-      setStudentPage(studentPageCount);
-    }
+    if (studentPage > studentPageCount) setStudentPage(studentPageCount);
   }, [studentPage, studentPageCount]);
 
   const boundedSubjectPage = Math.min(subjectPage, subjectPageCount);
@@ -217,6 +211,7 @@ const ClassDetailPage: React.FC = () => {
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
+                    onClick={() => setOpenDelete(true)}
                     className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -224,6 +219,13 @@ const ClassDetailPage: React.FC = () => {
                   </button>
                   <button
                     type="button"
+                    onClick={() =>
+                      router.push(
+                        `/admin/master-data/classes/class-detail/${encodeURIComponent(
+                          classDetail.name
+                        )}/edit`
+                      )
+                    }
                     className="inline-flex items-center gap-2 rounded-full border border-yellow-200 bg-yellow-100 px-4 py-2 text-sm font-semibold text-yellow-700 transition hover:bg-yellow-200"
                   >
                     <PenSquare className="h-4 w-4" />
@@ -548,6 +550,19 @@ const ClassDetailPage: React.FC = () => {
           </main>
         </div>
       </div>
+
+      {/* Modal Delete */}
+      <DeleteModal
+        open={openDelete}
+        name={classDetail.name}
+        msg="class"
+        onConfirm={() => {
+          setOpenDelete(false);
+          // lakukan aksi delete ke storage/API bila perlu
+          router.back(); // kembali setelah delete
+        }}
+        onClose={() => setOpenDelete(false)}
+      />
     </div>
   );
 };

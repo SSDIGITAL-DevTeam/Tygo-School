@@ -332,7 +332,7 @@ const ClassManagementPage: React.FC = () => {
                             <td className="px-3 py-3">
                               <div className="flex items-center justify-center gap-2">
                                 <EditAction
-                                  href={`${CLASSES_BASE}/${encodeURIComponent(row.name)}/edit`}
+                                  href={`${CLASSES_BASE}/class-detail/${encodeURIComponent(row.name)}/edit`}
                                   title={`Edit ${row.name}`}
                                 />
 
