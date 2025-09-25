@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Inter } from "next/font/google";
 import { useRouter, useSearchParams } from "next/navigation";
 import Sidebar from "../../../../../components/admin/Sidebar";
@@ -10,12 +10,15 @@ import { ArrowLeft, BookOpen } from "lucide-react";
 import { getSubjectList } from "../subject-data";
 import DeleteButton from "@/components/layout-global/DeleteButton";
 import EditButton from "@/components/layout-global/EditButton";
+import DeleteModal from "@/components/admin/modal/DeleteModal"; // <-- sesuaikan bila perlu
 
 const inter = Inter({ subsets: ["latin"] });
 
 const SubjectDetailPage: React.FC = () => {
   const router = useRouter();
   const params = useSearchParams();
+
+  const [openDelete, setOpenDelete] = useState(false);
 
   const subjectCode = params.get("code");
   const subjects = getSubjectList();
@@ -55,7 +58,9 @@ const SubjectDetailPage: React.FC = () => {
                       <BookOpen className="h-6 w-6" />
                     </div>
                     <div>
-                      <h1 className="text-xl font-semibold text-gray-900">Subject Detail</h1>
+                      <h1 className="text-xl font-semibold text-gray-900">
+                        Subject Detail
+                      </h1>
                       <p className="text-sm text-gray-500">{subject?.name ?? ""}</p>
                     </div>
                   </div>
@@ -80,7 +85,9 @@ const SubjectDetailPage: React.FC = () => {
                       </tr>
 
                       <tr className="border-b border-blue-300 border-dotted">
-                        <td className="px-6 py-3 text-gray-800">{subject?.code ?? "-"}</td>
+                        <td className="px-6 py-3 text-gray-800">
+                          {subject?.code ?? "-"}
+                        </td>
                         <td className="px-6 py-3 text-gray-800 border-l border-gray-200">
                           {subject?.name ?? "-"}
                         </td>
@@ -103,14 +110,20 @@ const SubjectDetailPage: React.FC = () => {
                   </table>
                 </div>
 
-                {/* Actions */}
-                <div className="flex flex-wrap gap-6">
+                {/* Actions: rata kanan */}
+                <div className="flex flex-wrap justify-end gap-6">
                   <DeleteButton
-                    onClick={() => router.back()}
+                    onClick={() => setOpenDelete(true)}
                     label="Delete Data"
                   />
                   <EditButton
-                    onClick={() => router}
+                    onClick={() =>
+                      router.push(
+                        `/admin/master-data/subjects/subject-detail/${encodeURIComponent(
+                          subject?.code ?? ""
+                        )}/edit`
+                      )
+                    }
                     label="Edit Data"
                   />
                 </div>
@@ -119,6 +132,19 @@ const SubjectDetailPage: React.FC = () => {
           </main>
         </div>
       </div>
+
+      {/* Modal Delete */}
+      <DeleteModal
+        open={openDelete}
+        name={subject?.name ?? subject?.code ?? "this subject"}
+        msg="subject"
+        onConfirm={() => {
+          setOpenDelete(false);
+          // lakukan aksi delete di sini jika sudah ada API/storage
+          router.back(); // kembali ke halaman sebelumnya setelah delete
+        }}
+        onClose={() => setOpenDelete(false)}
+      />
     </div>
   );
 };

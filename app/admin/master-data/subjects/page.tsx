@@ -292,13 +292,13 @@ const SubjectManagementPage: React.FC = () => {
                           <td className="px-3 py-3">
                             <div className="flex items-center gap-2">
                               <EditAction
-                                href={`${SUBJECTS_BASE}/${encodeURIComponent(row.name)}/edit`}
+                                href={`${SUBJECTS_BASE}/subject-detail/${encodeURIComponent(row.code)}/edit`}
                                 title={`Edit ${row.name}`}
                               />
 
-                              {/* Kanan: View -> /admin/master-data/classes/class-detail?name={name} */}
+                              {/* Kanan: View -> /admin/master-data/subjects/subject-detail?code={code} */}
                               <ViewAction
-                                href={`${SUBJECTS_BASE}/subject-detail?name=${encodeURIComponent(row.name)}`}
+                                href={`${SUBJECTS_BASE}/subject-detail?code=${encodeURIComponent(row.code)}`}
                                 title={`View ${row.name}`}
                               />
                             </div>
