@@ -1,6 +1,7 @@
-﻿"use client";
+﻿﻿"use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import StatusBadge from "@/components/StatusBadge";
 import {
   ChevronDown,
@@ -37,6 +38,7 @@ const reportFormats: ReportFormatCard[] = [
 ];
 
 const ReportFormatPage = () => {
+  const router = useRouter();
   const [reportQuery, setReportQuery] = useState("");
   const [reportStatus, setReportStatus] = useState<StatusFilter>("All");
   const [reportFilterOpen, setReportFilterOpen] = useState(false);
@@ -61,6 +63,7 @@ const ReportFormatPage = () => {
 
   return (
     <div className="space-y-6">
+      
       <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Report Format List</h2>
@@ -77,6 +80,7 @@ const ReportFormatPage = () => {
           </button>
           <button
             type="button"
+            onClick={() => router.push("/master-data/student-report/report-format/add-format")}
             className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#581c87]"
           >
             <Plus className="h-4 w-4" />

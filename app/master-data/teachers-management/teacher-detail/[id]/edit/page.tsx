@@ -19,7 +19,7 @@ import {
   PHONE_PREFIXES,
   SUBJECT_OPTIONS,
   TeacherStatus,
-} from "../../teacher-data";
+} from "../../../teacher-data";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -54,7 +54,6 @@ const TeacherEditPage: React.FC = () => {
           <Sidebar
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
-            active="Master Data"
           />
           <div className="flex-1 min-h-screen flex flex-col">
             <Header onToggleSidebar={() => setSidebarOpen((value) => !value)} />
@@ -148,7 +147,6 @@ const TeacherEditPage: React.FC = () => {
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          active="Master Data"
         />
         <div className="flex-1 min-h-screen flex flex-col">
           <Header onToggleSidebar={() => setSidebarOpen((value) => !value)} />

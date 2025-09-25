@@ -1,6 +1,7 @@
-﻿"use client";
+﻿﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import StatusBadge from "@/components/StatusBadge";
 import {
   Download,
@@ -62,6 +63,7 @@ const assessmentCategories: AssessmentCategoryRow[] = [
 ];
 
 const AssessmentCategoryPage = () => {
+  const router = useRouter();
   const [categoryQuery, setCategoryQuery] = useState("");
   const [categoryStatus, setCategoryStatus] = useState<StatusFilter>("All");
   const [categoryFilterOpen, setCategoryFilterOpen] = useState(false);
@@ -131,6 +133,7 @@ const AssessmentCategoryPage = () => {
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
           <button
             type="button"
+            onClick={() => router.push("/master-data/student-report/assessment-category/add-category")}
             className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#581c87]"
           >
             <Plus className="h-4 w-4" />
