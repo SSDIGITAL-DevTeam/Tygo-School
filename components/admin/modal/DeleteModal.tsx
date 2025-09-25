@@ -7,6 +7,7 @@ import BaseConfirmModal from "./_BaseConfirmModal";
 type Props = {
   open: boolean;
   name: string;                         // contoh: "XI-A"
+  msg: string;
   onConfirm: () => void;
   onClose: () => void;
   message?: string;
@@ -15,9 +16,10 @@ type Props = {
 export default function DeleteConfirmModal({
   open,
   name,
+  msg,
   onConfirm,
   onClose,
-  message = "Are you sure want to delete this class data?",
+  message = `Are you sure want to delete this ${msg} data?`,
 }: Props) {
   return (
     <BaseConfirmModal

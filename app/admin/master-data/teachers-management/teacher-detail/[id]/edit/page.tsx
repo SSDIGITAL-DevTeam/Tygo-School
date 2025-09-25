@@ -10,9 +10,10 @@ import { ArrowLeft, BookOpen, CheckCircle2, Plus, X } from "lucide-react";
 const Sidebar = dynamic(() => import("@/components/admin/Sidebar"), { ssr: false });
 const Header = dynamic(() => import("@/components/layout-global/Header"), { ssr: false });
 const ToggleSwitch = dynamic(() => import("@/components/layout-global/ToggleSwitch"), { ssr: false });
-const ConfirmDialog = dynamic(() => import("@/components/layout-global/ConfirmDialog"), { ssr: false });
+// GANTI: pakai EditModal (SaveChangesModal)
+const EditModal = dynamic(() => import("@/components/admin/modal/EditModal"), { ssr: false });
 
-// Data helpers (ubah path ini jika lokasi file Anda berbeda)
+// Data helpers
 import {
   getTeacherById,
   PHONE_PREFIXES,
@@ -20,6 +21,7 @@ import {
   TeacherStatus,
 } from "@/app/admin/master-data/teachers-management/teacher-data";
 import SaveButton from "@/components/layout-global/SaveButton";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -117,7 +119,7 @@ const TeacherEditPage: React.FC = () => {
     });
   };
 
-  // Submit
+  // Submit -> buka modal
   const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     setShowConfirm(true);
@@ -144,17 +146,11 @@ const TeacherEditPage: React.FC = () => {
     <nav aria-label="Breadcrumb" className="text-sm text-gray-600 mb-4">
       <ol className="flex items-center gap-2">
         <li>Master Data</li>
-        <li aria-hidden className="text-gray-400">
-          /
-        </li>
+        <li aria-hidden className="text-gray-400">/</li>
         <li>Manage Teachers</li>
-        <li aria-hidden className="text-gray-400">
-          /
-        </li>
+        <li aria-hidden className="text-gray-400">/</li>
         <li>Teacher Detail</li>
-        <li aria-hidden className="text-gray-400">
-          /
-        </li>
+        <li aria-hidden className="text-gray-400">/</li>
         <li className="text-gray-900 font-medium">Edit Teacher</li>
       </ol>
     </nav>
@@ -335,6 +331,7 @@ const TeacherEditPage: React.FC = () => {
                 </div>
 
                 <div className="flex justify-end">
+                  {/* type default SaveButton adalah submit -> memicu onSubmit */}
                   <SaveButton />
                 </div>
               </form>
@@ -343,12 +340,10 @@ const TeacherEditPage: React.FC = () => {
         </div>
       </div>
 
-      <ConfirmDialog
+      {/* MODAL SAVE CHANGES */}
+      <EditModal
         open={showConfirm}
-        title="Save changes?"
-        description="Updates will be stored locally in this prototype."
-        confirmText="Save"
-        cancelText="Cancel"
+        msg="this teacher"
         onConfirm={confirmUpdate}
         onClose={() => setShowConfirm(false)}
       />
@@ -363,7 +358,7 @@ type FieldRowProps = {
 
 const FieldRow: React.FC<FieldRowProps> = ({ label, element }) => (
   <label className="grid items-center gap-3 text-sm md:grid-cols-[180px,1fr]">
-    <span className="justify-self-end text-right font-medium text-gray-700 whitespace-nowrap after:ml-1 after:content-[':']">
+    <span className="justify-self-end whitespace-nowrap text-right font-medium text-gray-700 after:ml-1 after:content-[':']">
       {label}
     </span>
     <div className="min-w-0">{element}</div>

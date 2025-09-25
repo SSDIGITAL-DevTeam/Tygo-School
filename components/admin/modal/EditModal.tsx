@@ -6,14 +6,14 @@ import BaseConfirmModal from "./_BaseConfirmModal";
 
 type Props = {
   open: boolean;
-  entityLabel?: string;                  // default "this classes data"
+  msg?: string;                  // default "this classes data"
   onConfirm: () => void;
   onClose: () => void;
 };
 
 export default function SaveChangesModal({
   open,
-  entityLabel = "this classes data",
+  msg,
   onConfirm,
   onClose,
 }: Props) {
@@ -21,7 +21,7 @@ export default function SaveChangesModal({
     <BaseConfirmModal
       open={open}
       title="Save Changes?"
-      message={`Are you sure you want to save the updates to ${entityLabel}?`}
+      message={`Are you sure you want to save the updates to ${msg} data?`}
       confirmLabel="Yes, Save"
       cancelLabel="No"
       onConfirm={onConfirm}

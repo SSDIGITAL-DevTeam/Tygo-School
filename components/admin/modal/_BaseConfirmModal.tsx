@@ -57,7 +57,7 @@ export default function BaseConfirmModal({
           <p className="mb-5 ml-10 text-sm text-gray-600">{message}</p>
         )}
 
-        <div className="ml-10 flex items-center gap-2">
+        <div className="mt-6 flex justify-end gap-2">
           <button
             type="button"
             onClick={onClose}

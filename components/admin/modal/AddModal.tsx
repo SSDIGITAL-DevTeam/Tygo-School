@@ -6,19 +6,19 @@ import BaseConfirmModal from "./_BaseConfirmModal";
 
 type Props = {
   open: boolean;
-  name?: string;                         // contoh: "Mathematics"
+  msg?: string;                         // contoh: "Mathematics"
   onConfirm: () => void;
   onClose: () => void;
 };
 
 export default function AddSubjectModal({
   open,
-  name,
+  msg,
   onConfirm,
   onClose,
 }: Props) {
-  const title = "Add Subject?";
-  const message = `Are you sure want to add ${name ? `"${name}"` : "this subject"}?`;
+  const title = `Add ${msg}?`;
+  const message = `Are you sure want to add this ${msg ? `${msg}` : "this subject"}?`;
   return (
     <BaseConfirmModal
       open={open}
