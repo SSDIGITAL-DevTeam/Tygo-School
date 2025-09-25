@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react"; // ← +useEffect (opsional)
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../../../../components/admin/Sidebar";
 import Header from "../../../../../components/layout-global/Header";
-import { ArrowLeft, BookOpen, Save } from "lucide-react";
+import { ArrowLeft, BookOpen } from "lucide-react";
 import SaveButton from "@/components/layout-global/SaveButton";
+import AddSubjectModal from "@/components/admin/modal/AddModal"; // ← IMPORT MODAL
 
 type FieldState = {
   subjectCode: string;
@@ -25,6 +26,10 @@ const initialState: FieldState = {
 const AddSubjectPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [form, setForm] = useState<FieldState>(initialState);
+
+  // ← STATE MODAL
+  const [showAddModal, setShowAddModal] = useState(false);
+
   const router = useRouter();
 
   const isDirty = useMemo(() => {
@@ -41,20 +46,35 @@ const AddSubjectPage: React.FC = () => {
       setForm((prev) => ({ ...prev, [field]: event.target.value }));
     };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  // Logic “simpan” ketika user KONFIRM di modal
+  const doSave = () => {
     // TODO: integrate with backend
-    alert("Data has been saved (mock).");
+    // contoh mock simpan:
+    console.log("Saving subject:", form);
+    setShowAddModal(false);
+    alert("Subject has been saved (mock).");
+    // reset form (opsional)
+    // setForm(initialState);
+    // router.push("/master-data/subjects");
   };
 
-  // --- tambahkan di atas komponen AddSubjectPage ---
+  // (Opsional) kunci scroll saat modal terbuka
+  useEffect(() => {
+    if (!showAddModal) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [showAddModal]);
+
+  // Komponen baris form
   const FormRow: React.FC<{
     label: string;
     required?: boolean;
     input: React.ReactNode;
   }> = ({ label, required, input }) => (
     <div className="grid grid-cols-1 items-center gap-3 py-3 md:grid-cols-[220px_minmax(0,1fr)]">
-      {/* Label kanan + titik dua */}
       <label className="flex items-center justify-end pr-3 text-sm font-medium text-gray-700">
         <span className="text-gray-700">
           {label}
@@ -62,8 +82,6 @@ const AddSubjectPage: React.FC = () => {
         </span>
         <span className="ml-1 text-gray-400">:</span>
       </label>
-
-      {/* Kolom input */}
       <div className="min-w-0">{input}</div>
     </div>
   );
@@ -71,10 +89,7 @@ const AddSubjectPage: React.FC = () => {
   return (
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
       <div className="flex">
-        <Sidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <div className="flex min-h-screen flex-1 flex-col">
           <Header onToggleSidebar={() => setSidebarOpen((open) => !open)} />
@@ -101,17 +116,17 @@ const AddSubjectPage: React.FC = () => {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f3e8ff] text-[#6c2bd9]">
                   <BookOpen className="h-6 w-6" />
                 </div>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Add Subject
-                </h1>
+                <h1 className="text-xl font-semibold text-gray-900">Add Subject</h1>
               </div>
 
-              <form onSubmit={handleSubmit} className="px-6 pb-8 pt-6">
+              {/* Form tidak submit langsung; Save memicu modal */}
+              <form
+                onSubmit={(e) => e.preventDefault()}
+                className="px-6 pb-8 pt-6"
+              >
                 <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                  {/* strip tipis atas */}
                   <div className="h-3 -mx-6 -mt-6 mb-6 rounded-t-2xl bg-gray-100" />
 
-                  {/* Pusatkan konten form */}
                   <div className="mx-auto w-full max-w-[860px]">
                     <FormRow
                       label="Subject Code"
@@ -159,11 +174,15 @@ const AddSubjectPage: React.FC = () => {
                       }
                     />
 
-                    {/* Baris tombol ditempatkan di kolom input */}
+                    {/* Tombol Save: buka modal */}
                     <div className="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]">
                       <div className="hidden md:block" />
                       <div className="mt-2 flex justify-end">
-                        <SaveButton />
+                        <SaveButton
+                          type="button"
+                          disabled={!isDirty}
+                          onClick={() => setShowAddModal(true)}
+                        />
                       </div>
                     </div>
                   </div>
@@ -173,6 +192,14 @@ const AddSubjectPage: React.FC = () => {
           </main>
         </div>
       </div>
+
+      {/* Modal konfirmasi Add Subject */}
+      <AddSubjectModal
+        open={showAddModal}
+        msg={"subject"}
+        onConfirm={doSave}
+        onClose={() => setShowAddModal(false)}
+      />
     </div>
   );
 };

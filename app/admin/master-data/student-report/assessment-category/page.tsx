@@ -1,4 +1,4 @@
-﻿﻿"use client";
+﻿﻿﻿﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -248,10 +248,10 @@ const AssessmentCategoryPage = () => {
                         title={`Edit ${row.id}`}
                       />
 
-                      {/* Kanan: View -> /admin/master-data/classes/class-detail?name={name} */}
+                      {/* View -> detail-category page */}
                       <ViewAction
-                        href={`${REPORT_BASE}/subject-detail?id=${encodeURIComponent(row.id)}`}
-                        title={`View ${row.id}`}
+                        href={`${REPORT_BASE}/detail-category?id=${encodeURIComponent(row.id)}`}
+                        title={`View ${row.name}`}
                       />
                     </div>
                   </td>

@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Shapes } from "lucide-react";
+import { ArrowLeft, Save, Shapes, Trash2 } from "lucide-react";
+import AddModal from "@/components/admin/modal/AddModal";
+import DeleteModal from "@/components/admin/modal/DeleteModal";
 
 type FormState = {
   categoryName: string;
@@ -21,6 +23,8 @@ const relatedToOptions = ["Subject", "Personal Assessment", "Extracurricular"];
 
 const AddCategoryPage: React.FC = () => {
   const [form, setForm] = useState<FormState>(initialState);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const router = useRouter();
 
   const handleChange =
@@ -31,9 +35,24 @@ const AddCategoryPage: React.FC = () => {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // Trigger save confirmation modal instead of direct save
+    setAddModalOpen(true);
+  };
+
+  const handleSaveConfirm = () => {
     console.log("Saving category:", form);
-    alert("Assessment category has been saved successfully!");
+    setAddModalOpen(false);
+    // Here you would typically make an API call to save the data
     router.back();
+  };
+
+  const handleClearForm = () => {
+    setDeleteModalOpen(true);
+  };
+
+  const handleClearConfirm = () => {
+    setForm(initialState);
+    setDeleteModalOpen(false);
   };
 
   const FormRow: React.FC<{
@@ -157,6 +176,17 @@ const AddCategoryPage: React.FC = () => {
           </div>
         </div>
       </form>
+
+      {/* Add Confirmation Modal */}
+      <AddModal
+        open={addModalOpen}
+        msg="assessment category"
+        onConfirm={handleSaveConfirm}
+        onClose={() => setAddModalOpen(false)}
+      />
+
+      {/* Clear Form Confirmation Modal */}
+      
     </div>
   );
 };
