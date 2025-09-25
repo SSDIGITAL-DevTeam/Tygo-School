@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Sidebar from "../../../../../components/admin/Sidebar";
 import Header from "../../../../../components/layout-global/Header";
 import { ArrowLeft, BookOpen, Save } from "lucide-react";
+import SaveButton from "@/components/layout-global/SaveButton";
 
 type FieldState = {
   subjectCode: string;
@@ -162,14 +163,7 @@ const AddSubjectPage: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]">
                       <div className="hidden md:block" />
                       <div className="mt-2 flex justify-end">
-                        <button
-                          type="submit"
-                          className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-[#5922b8] disabled:cursor-not-allowed disabled:bg-purple-200"
-                          disabled={!isDirty}
-                        >
-                          <span className="inline-block h-2 w-2 rounded-full bg-white/90" />
-                          Save Data
-                        </button>
+                        <SaveButton />
                       </div>
                     </div>
                   </div>

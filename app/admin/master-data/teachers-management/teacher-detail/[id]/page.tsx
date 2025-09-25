@@ -12,7 +12,7 @@ import { formatTeacherPhone, getTeacherById } from "../../teacher-data";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const TEACHER_LIST_PATH = "/master-data/teachers-management/teacher-list";
+const TEACHER_LIST_PATH = "/admin/master-data/teachers-management/teacher-detail";
 
 type Status = "Active" | "Non Active";
 
