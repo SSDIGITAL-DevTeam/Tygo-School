@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import StatusBadge from "@/components/StatusBadge";
+import StatusBadge from "@/components/layout-global/StatusBadge";
 import {
   Download,
   Eye,

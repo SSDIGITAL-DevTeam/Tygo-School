@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import Sidebar from "../../../../../../components/Sidebar";
-import Topbar from "../../../../../../components/Topbar";
-import Toast from "../../../../../../components/Toast";
+import Sidebar from "../../../../../../components/admin/Sidebar";
+import Topbar from "../../../../../../components/layout-global/Topbar";
+import Toast from "../../../../../../components/layout-global/Toast";
 import { Inter } from "next/font/google";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";

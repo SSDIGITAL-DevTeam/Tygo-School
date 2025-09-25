@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import Sidebar from "../../../../../components/Sidebar";
-import Header from "../../../../../components/Header";
-import Pagination from "../../../../../components/Pagination";
-import StatusBadge from "../../../../../components/StatusBadge";
+import Sidebar from "../../../../../components/admin/Sidebar";
+import Header from "../../../../../components/layout-global/Header";
+import Pagination from "../../../../../components/layout-global/Pagination";
+import StatusBadge from "../../../../../components/layout-global/StatusBadge";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import {

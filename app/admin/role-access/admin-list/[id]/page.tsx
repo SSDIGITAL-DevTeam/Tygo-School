@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import Sidebar from "../../../../../components/Sidebar";
-import Topbar from "../../../../../components/Topbar";
-import ConfirmDialog from "../../../../../components/ConfirmDialog";
-import Toast from "../../../../../components/Toast";
+import Sidebar from "../../../../../components/admin/Sidebar";
+import Topbar from "../../../../../components/layout-global/Topbar";
+import ConfirmDialog from "../../../../../components/layout-global/ConfirmDialog";
+import Toast from "../../../../../components/layout-global/Toast";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Inter } from "next/font/google";

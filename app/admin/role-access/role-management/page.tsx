@@ -1,8 +1,8 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import Sidebar from "../../../../components/Sidebar";
-import Topbar from "../../../../components/Topbar";
-import RoleTable from "../../../../components/RoleTable";
+import Sidebar from "../../../../components/admin/Sidebar";
+import Topbar from "../../../../components/layout-global/Topbar";
+import RoleTable from "../../../../components/admin/RoleTable";
 import { Inter } from "next/font/google";
 import { Shield } from "lucide-react";
 

@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import Sidebar from "../../../components/Sidebar";
-import Topbar from "../../../components/Topbar";
-import UploadLogo from "../../../components/UploadLogo";
-import Toast from "../../../components/Toast";
+import Sidebar from "../../../components/admin/Sidebar";
+import Topbar from "../../../components/layout-global/Topbar";
+import UploadLogo from "../../../components/admin/UploadLogo";
+import Toast from "../../../components/layout-global/Toast";
 import { Inter } from "next/font/google";
 import { Settings, Save, ChevronDown } from "lucide-react";
 import { z } from "zod";

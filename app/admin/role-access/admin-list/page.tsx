@@ -1,8 +1,8 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import Sidebar from "../../../../components/Sidebar";
-import Topbar from "../../../../components/Topbar";
-import AdminTable, { AdminRow } from "../../../../components/AdminTable";
+import Sidebar from "../../../../components/admin/Sidebar";
+import Topbar from "../../../../components/layout-global/Topbar";
+import AdminTable, { AdminRow } from "../../../../components/admin/AdminTable";
 import { Inter } from "next/font/google";
 import { Users } from "lucide-react";
 

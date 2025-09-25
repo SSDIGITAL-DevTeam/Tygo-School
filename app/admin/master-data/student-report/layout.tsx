@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Inter } from "next/font/google";
 import { BookOpen } from "lucide-react";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
+import Sidebar from "@/components/admin/Sidebar";
+import Header from "@/components/layout-global/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 

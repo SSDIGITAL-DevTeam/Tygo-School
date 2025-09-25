@@ -3,9 +3,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Inter } from "next/font/google";
 import { useRouter, useSearchParams } from "next/navigation";
-import Sidebar from "../../../../../components/Sidebar";
-import Header from "../../../../../components/Header";
-import StatusBadge from "../../../../../components/StatusBadge";
+import Sidebar from "../../../../../components/admin/Sidebar";
+import Header from "../../../../../components/layout-global/Header";
+import StatusBadge from "../../../../../components/layout-global/StatusBadge";
 import {
   ArrowLeft,
   ArrowUpDown,
@@ -16,7 +16,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import Pagination from "../../../../../components/Pagination";
+import Pagination from "../../../../../components/layout-global/Pagination";
 import { getClassDetailByName, StudentFlagColor } from "../class-data";
 
 const inter = Inter({ subsets: ["latin"] });

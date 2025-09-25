@@ -3,10 +3,10 @@
 import React, { useMemo, useState } from "react";
 import { Inter } from "next/font/google";
 import { useParams, useRouter } from "next/navigation";
-import Sidebar from "../../../../../../../components/Sidebar";
-import Header from "../../../../../../../components/Header";
-import ToggleSwitch from "../../../../../../../components/ToggleSwitch";
-import ConfirmDialog from "../../../../../../../components/ConfirmDialog";
+import Sidebar from "../../../../../../../components/admin/Sidebar";
+import Header from "../../../../../../../components/layout-global/Header";
+import ToggleSwitch from "../../../../../../../components/layout-global/ToggleSwitch";
+import ConfirmDialog from "../../../../../../../components/layout-global/ConfirmDialog";
 import {
   ArrowLeft,
   BookOpen,

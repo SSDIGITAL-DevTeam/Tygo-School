@@ -3,9 +3,9 @@
 import React from "react";
 import { Inter } from "next/font/google";
 import { useRouter, useSearchParams } from "next/navigation";
-import Sidebar from "../../../../../components/Sidebar";
-import Header from "../../../../../components/Header";
-import StatusBadge from "../../../../../components/StatusBadge";
+import Sidebar from "../../../../../components/admin/Sidebar";
+import Header from "../../../../../components/layout-global/Header";
+import StatusBadge from "../../../../../components/layout-global/StatusBadge";
 import { ArrowLeft, BookOpen, PenSquare, Trash2 } from "lucide-react";
 import { getSubjectList } from "../subject-data";
 

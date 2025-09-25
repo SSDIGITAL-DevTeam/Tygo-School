@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import Sidebar from "../../../components/Sidebar";
-import Topbar from "../../../components/Topbar";
-import Pagination from "../../../components/Pagination";
+import Sidebar from "../../../components/admin/Sidebar";
+import Topbar from "../../../components/layout-global/Topbar";
+import Pagination from "../../../components/layout-global/Pagination";
 import {
   Search,
   Download,

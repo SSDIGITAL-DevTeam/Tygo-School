@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from "react";
-import Sidebar from "../../../../../components/Sidebar";
-import Topbar from "../../../../../components/Topbar";
-import SectionCard from "../../../../../components/SectionCard";
-import ConfirmDialog from "../../../../../components/ConfirmDialog";
+import Sidebar from "../../../../../components/admin/Sidebar";
+import Topbar from "../../../../../components/layout-global/Topbar";
+import SectionCard from "../../../../../components/layout-global/SectionCard";
+import ConfirmDialog from "../../../../../components/layout-global/ConfirmDialog";
 import { Inter } from "next/font/google";
 import { ArrowLeft, Users, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";

@@ -29,7 +29,7 @@ export default function AdminLoginPage() {
         const payload = await res.json().catch(() => ({}));
         throw new Error(payload?.detail || payload?.title || "Login failed");
       }
-      router.push("/dashboard");
+      router.push("admin/dashboard");
     } catch (err: any) {
       setError(err?.message || "Unexpected error");
     } finally {

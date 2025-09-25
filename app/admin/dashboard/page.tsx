@@ -1,11 +1,11 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
-import Sidebar from "../../../components/Sidebar";
-import Topbar from "../../../components/Topbar";
-import Pagination from "../../../components/Pagination";
-import OverviewCard from "../../../components/OverviewCard";
-import SectionCard from "../../../components/SectionCard";
-import StatusBadge from "../../../components/StatusBadge";
+import Sidebar from "../../../components/admin/Sidebar";
+import Topbar from "../../../components/layout-global/Topbar";
+import Pagination from "../../../components/layout-global/Pagination";
+import OverviewCard from "../../../components/layout-global/OverviewCard";
+import SectionCard from "../../../components/layout-global/SectionCard";
+import StatusBadge from "../../../components/layout-global/StatusBadge";
 import { Inter } from "next/font/google";
 import {
   Calendar,

@@ -3,8 +3,8 @@
 import React, { useMemo, useState } from "react";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
-import Sidebar from "../../../../../components/Sidebar";
-import Header from "../../../../../components/Header";
+import Sidebar from "../../../../../components/admin/Sidebar";
+import Header from "../../../../../components/layout-global/Header";
 import { ArrowLeft, BookOpen, Save } from "lucide-react";
 
 type FieldState = {
