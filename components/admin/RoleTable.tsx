@@ -9,11 +9,8 @@ import {
   ChevronDown,
   Pencil,
   Eye,
-  ChevronsLeft,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsRight,
 } from "lucide-react";
+import Pagination from "@/components/layout-global/Pagination";
 
 type RoleRow = { name: string; features: number; status: "Active" | "Non Active" };
 type SortKey = "name" | "features";
@@ -26,6 +23,8 @@ const RoleTable: React.FC<Props> = ({ data }) => {
   const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Non Active">("All");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  // state pagination untuk komponen Pagination reusable
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(4);
 
@@ -56,7 +55,7 @@ const RoleTable: React.FC<Props> = ({ data }) => {
     return rows;
   }, [data, query, statusFilter, sortKey, sortDir]);
 
-  // pagination
+  // pagination (hanya logic data slice, UI pakai <Pagination />)
   const total = filtered.length;
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const currentPage = Math.min(page, pageCount);
@@ -71,27 +70,9 @@ const RoleTable: React.FC<Props> = ({ data }) => {
     setStatusFilter(v); setFilterOpen(false); setPage(1);
   };
 
-  // compact page numbers with ellipsis
-  const paginationItems = useMemo(() => {
-    const nums: number[] = [1];
-    for (let i = currentPage - 1; i <= currentPage + 1; i++) if (i > 1 && i < pageCount) nums.push(i);
-    if (pageCount > 1) nums.push(pageCount);
-    const uniq = Array.from(new Set(nums)).sort((a, b) => a - b);
-    const items: (number | "ellipsis")[] = [];
-    uniq.forEach((n, idx) => {
-      const prev = uniq[idx - 1];
-      if (idx > 0 && prev !== undefined && n - prev > 1) items.push("ellipsis");
-      items.push(n);
-    });
-    return items;
-  }, [currentPage, pageCount]);
-
-  const goToPage = (n: number) => setPage(Math.min(Math.max(1, n), pageCount));
-  const [goInput, setGoInput] = useState("");
-
   return (
     <section className="rounded-2xl bg-white p-6 shadow-md ring-1 ring-slate-200">
-      {/* Header title + Add Role (lebih jauh jaraknya dari toolbar) */}
+      {/* Header title + Add Role */}
       <div className="mb-10 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">Role List</h2>
         <button
@@ -228,112 +209,18 @@ const RoleTable: React.FC<Props> = ({ data }) => {
         </table>
       </div>
 
-      {/* Footer: page size + pagination + Go >> */}
-      <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-2 text-sm text-slate-600">
-          <span>Showing</span>
-          <select
-            aria-label="Rows per page"
-            value={pageSize}
-            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-            className="h-8 rounded-md border border-slate-300 px-2 text-sm focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-300"
-          >
-            {[4, 10, 25].map((n) => <option key={n} value={n}>{n}</option>)}
-          </select>
-          <span>from {total} data</span>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3 text-sm">
-          <div className="inline-flex items-center gap-1">
-            <button
-              type="button"
-              aria-label="First page"
-              onClick={() => goToPage(1)}
-              disabled={currentPage === 1}
-              className="min-w-[32px] h-8 rounded-md border border-slate-300 bg-white px-2 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <ChevronsLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              aria-label="Previous page"
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="min-w-[32px] h-8 rounded-md border border-slate-300 bg-white px-2 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-
-            {paginationItems.map((it, idx) =>
-              it === "ellipsis" ? (
-                <span key={`e-${idx}`} className="px-2 text-slate-400">…</span>
-              ) : (
-                <button
-                  key={it}
-                  type="button"
-                  aria-current={it === currentPage ? "page" : undefined}
-                  onClick={() => goToPage(it)}
-                  className={`min-w-[32px] h-8 rounded-full border px-3 transition ${
-                    it === currentPage
-                      ? "border-transparent bg-violet-700 text-white"
-                      : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  {it}
-                </button>
-              )
-            )}
-
-            <button
-              type="button"
-              aria-label="Next page"
-              onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage === pageCount}
-              className="min-w-[32px] h-8 rounded-md border border-slate-300 bg-white px-2 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              aria-label="Last page"
-              onClick={() => goToPage(pageCount)}
-              disabled={currentPage === pageCount}
-              className="min-w-[32px] h-8 rounded-md border border-slate-300 bg-white px-2 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <ChevronsRight className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Go to page */}
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min={1}
-              max={pageCount}
-              value={goInput}
-              onChange={(e) => setGoInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  const n = Number(goInput);
-                  if (!Number.isNaN(n)) goToPage(n);
-                }
-              }}
-              className="h-8 w-14 rounded-md border border-slate-300 bg-white px-2 text-center text-sm focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-300"
-              aria-label="Go to page"
-              placeholder="--"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                const n = Number(goInput);
-                if (!Number.isNaN(n)) goToPage(n);
-              }}
-              className="text-violet-700 hover:underline"
-            >
-              Go &gt;&gt;
-            </button>
-          </div>
-        </div>
+      {/* Footer: cukup render Pagination reusable */}
+      <div className="mt-6">
+        <Pagination
+          total={total}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(sz) => {
+            setPageSize(sz);
+            setPage(1); // reset saat page size berubah
+          }}
+        />
       </div>
     </section>
   );
