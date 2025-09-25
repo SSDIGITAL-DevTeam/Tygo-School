@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function AdminLoginPage() {
+export default function TeacherLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,8 +15,8 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const onLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError(null);
     setLoading(true);
     try {
@@ -26,8 +26,8 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ email, password }),
       });
       if (!res.ok) {
-        const p = await res.json().catch(() => ({}));
-        throw new Error(p?.detail || p?.title || "Login failed");
+        const payload = await res.json().catch(() => ({}));
+        throw new Error(payload?.detail || payload?.title || "Login failed");
       }
       router.push("/dashboard");
     } catch (err: any) {
@@ -38,36 +38,20 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className={`${inter.className} flex min-h-svh flex-col md:flex-row bg-gray-50`}>
-      {/* Left column: Login card */}
-      <div className="flex w-full md:flex-1 items-center justify-center px-4 py-6 sm:p-8">
+    <div className={`${inter.className} flex min-h-svh flex-col bg-gray-50 md:flex-row`}>
+      <div className="flex w-full items-center justify-center px-4 py-6 sm:p-8 md:flex-1">
         <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
-          {/* Brand center */}
           <div className="mb-8 flex items-center justify-center gap-2 text-[#6B21A8]">
-            <svg
-              className="h-7 w-7"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
+            <svg className="h-7 w-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path d="M12 2 1 7l11 5 11-5-11-5Zm0 8.8L4.1 7 12 3.9 19.9 7 12 10.8Z" />
               <path d="M22 10.7 12 15 2 10.7V13l10 4.6 10-4.6v-2.3Z" />
             </svg>
             <span className="text-xl font-semibold">Tygo School OS</span>
           </div>
 
-          {/* Page title now left-aligned */}
-          <h1 className="mb-6 text-left text-lg font-semibold text-gray-900">
-            Admin Login
-          </h1>
+          <h1 className="mb-6 text-left text-lg font-semibold text-gray-900">Teacher Login</h1>
 
-          {/* Form */}
-          <form
-            onSubmit={onLogin}
-            className="space-y-6"
-            aria-describedby={error ? "login-error" : undefined}
-          >
-            {/* Email */}
+          <form onSubmit={onLogin} className="space-y-6" aria-describedby={error ? "teacher-login-error" : undefined}>
             <div>
               <label htmlFor="email" className="mb-2 block text-sm text-gray-700">
                 Email
@@ -85,7 +69,6 @@ export default function AdminLoginPage() {
               />
             </div>
 
-            {/* Password + toggle */}
             <div>
               <label htmlFor="password" className="mb-2 block text-sm text-gray-700">
                 Password
@@ -112,7 +95,6 @@ export default function AdminLoginPage() {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-
               <div className="mt-2 text-right">
                 <Link
                   href="/forgot-password"
@@ -123,14 +105,12 @@ export default function AdminLoginPage() {
               </div>
             </div>
 
-            {/* Error */}
             {error && (
-              <div id="login-error" role="alert" className="text-sm text-red-600">
+              <div id="teacher-login-error" role="alert" className="text-sm text-red-600">
                 {error}
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -142,21 +122,17 @@ export default function AdminLoginPage() {
         </div>
       </div>
 
-      {/* Right column: welcome gradient */}
-      <section className="hidden md:flex md:flex-1 items-center justify-center bg-gradient-to-br from-[#6B21A8] to-[#4C1D95] p-12 text-white">
+      <section className="hidden items-center justify-center bg-gradient-to-br from-[#6B21A8] to-[#4C1D95] p-12 text-white md:flex md:flex-1">
         <div className="max-w-md text-left">
-          <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-            Welcome to <span className="text-white">Tygo School Operating System</span>
+          <h2 className="mb-4 text-3xl font-light md:text-4xl">
+            Welcome to <span className="font-bold">Tygo School Operating System</span>
           </h2>
           <p className="text-lg leading-relaxed text-purple-100">
-            A smart, integrated school platform to track student performance,
-            strengthen teacher–parent communication, and simplify tuition payments —
-            all in one place.
+            A smart, integrated school platform to track student performance, strengthen teacher-parent communication, and simplify tuition payments — all in one place.
           </p>
         </div>
       </section>
 
-      {/* Hide native Edge/Chrome eye icon */}
       <style jsx global>{`
         input[type="password"]::-ms-reveal,
         input[type="password"]::-ms-clear {
