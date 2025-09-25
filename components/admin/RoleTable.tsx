@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   Filter,
   Search,
@@ -18,97 +19,101 @@ type SortDir = "asc" | "desc";
 type Props = { data: RoleRow[] };
 
 const RoleTable: React.FC<Props> = ({ data }) => {
-  // filters / search / sort / page
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Non Active">("All");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
-
-  // state pagination untuk komponen Pagination reusable
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(4);
-
-  // filter popover
   const [filterOpen, setFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (!filterOpen) return;
-    const onDocClick = (e: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setFilterOpen(false);
+    const handler = (event: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) setFilterOpen(false);
     };
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, [filterOpen]);
 
-  // derive rows
   const filtered = useMemo(() => {
     let rows = [...data];
-    if (statusFilter !== "All") rows = rows.filter((r) => r.status === statusFilter);
+    if (statusFilter !== "All") rows = rows.filter((row) => row.status === statusFilter);
     const q = query.trim().toLowerCase();
-    if (q) rows = rows.filter((r) => r.name.toLowerCase().includes(q));
+    if (q) rows = rows.filter((row) => row.name.toLowerCase().includes(q));
     rows.sort((a, b) => {
-      const va: any = a[sortKey];
-      const vb: any = b[sortKey];
-      const cmp = typeof va === "number" ? va - vb : String(va).localeCompare(String(vb), undefined, { numeric: true });
+      const left: any = a[sortKey];
+      const right: any = b[sortKey];
+      const cmp = typeof left === "number"
+        ? left - right
+        : String(left).localeCompare(String(right), undefined, { numeric: true });
       return sortDir === "asc" ? cmp : -cmp;
     });
     return rows;
-  }, [data, query, statusFilter, sortKey, sortDir]);
+  }, [data, query, sortKey, sortDir, statusFilter]);
 
-  // pagination (hanya logic data slice, UI pakai <Pagination />)
   const total = filtered.length;
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const currentPage = Math.min(page, pageCount);
   const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  useEffect(() => { if (page > pageCount) setPage(pageCount); }, [page, pageCount]);
+
+  useEffect(() => {
+    if (page > pageCount) setPage(pageCount);
+  }, [page, pageCount]);
 
   const toggleSort = (key: SortKey) => {
-    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else { setSortKey(key); setSortDir("asc"); }
+    if (sortKey === key) setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
   };
-  const changeStatus = (v: "All" | "Active" | "Non Active") => {
-    setStatusFilter(v); setFilterOpen(false); setPage(1);
+
+  const changeStatus = (value: "All" | "Active" | "Non Active") => {
+    setStatusFilter(value);
+    setFilterOpen(false);
+    setPage(1);
   };
 
   return (
     <section className="rounded-2xl bg-white p-6 shadow-md ring-1 ring-slate-200">
-      {/* Header title + Add Role */}
       <div className="mb-10 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">Role List</h2>
-        <button
-          type="button"
+        <Link
+          href="/role-access/role-management/add"
           className="inline-flex items-center gap-2 rounded-full bg-violet-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition active:scale-95 hover:bg-violet-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
-          onClick={() => console.log("Add role clicked")}
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden />
           <span>Add Role</span>
-        </button>
+        </Link>
       </div>
 
-      {/* Toolbar */}
       <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative" ref={filterRef}>
             <button
               type="button"
-              onClick={() => setFilterOpen((o) => !o)}
-              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+              aria-haspopup="menu"
+              aria-expanded={filterOpen}
+              onClick={() => setFilterOpen((open) => !open)}
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition active:scale-95 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
             >
-              <Filter className="h-4 w-4 text-slate-500" />
+              <Filter className="h-4 w-4 text-slate-500" aria-hidden />
               <span>Filter</span>
             </button>
             {filterOpen && (
               <div className="absolute z-20 mt-2 w-40 rounded-lg border border-slate-200 bg-white p-2 shadow-lg">
-                {["All", "Active", "Non Active"].map((v) => (
+                {["All", "Active", "Non Active"].map((status) => (
                   <button
-                    key={v}
+                    key={status}
                     type="button"
-                    onClick={() => changeStatus(v as typeof statusFilter)}
+                    onClick={() => changeStatus(status as typeof statusFilter)}
                     className={`flex w-full items-center rounded-md px-3 py-2 text-sm ${
-                      statusFilter === v ? "bg-violet-50 text-violet-700" : "text-slate-600 hover:bg-slate-50"
+                      statusFilter === status ? "bg-violet-50 text-violet-700" : "text-slate-600 hover:bg-slate-50"
                     }`}
                   >
-                    {v === "All" ? "All Status" : v}
+                    {status === "All" ? "All Status" : status}
                   </button>
                 ))}
               </div>
@@ -116,10 +121,13 @@ const RoleTable: React.FC<Props> = ({ data }) => {
           </div>
 
           <div className="relative w-full max-w-md">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
             <input
               value={query}
-              onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(1);
+              }}
               placeholder="Search Here"
               className="w-full rounded-md border border-slate-300 pl-9 pr-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-300"
             />
@@ -128,15 +136,14 @@ const RoleTable: React.FC<Props> = ({ data }) => {
 
         <button
           type="button"
-          className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm hover:bg-slate-50"
+          className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm transition active:scale-95 hover:bg-slate-50"
           onClick={() => console.log("Download roles")}
         >
-          <Download className="h-4 w-4" />
+          <Download className="h-4 w-4" aria-hidden />
           <span>Download Data</span>
         </button>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full table-auto text-sm text-slate-800">
           <thead>
@@ -144,8 +151,8 @@ const RoleTable: React.FC<Props> = ({ data }) => {
               {[
                 { key: "name", label: "Role Name" },
                 { key: "features", label: "Accessible Features" },
-                { key: "status" as const, label: "Status" },
-                { key: "action" as const, label: "Action" },
+                { key: "status", label: "Status" },
+                { key: "action", label: "Action" },
               ].map((col) => (
                 <th
                   key={col.key}
@@ -162,9 +169,9 @@ const RoleTable: React.FC<Props> = ({ data }) => {
                       {col.label}
                       {sortKey === (col.key as SortKey)
                         ? sortDir === "asc"
-                          ? <ChevronUp className="h-4 w-4" />
-                          : <ChevronDown className="h-4 w-4" />
-                        : <ChevronUp className="h-4 w-4 text-slate-400" />}
+                          ? <ChevronUp className="h-4 w-4" aria-hidden />
+                          : <ChevronDown className="h-4 w-4" aria-hidden />
+                        : <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden />}
                     </button>
                   )}
                 </th>
@@ -172,8 +179,8 @@ const RoleTable: React.FC<Props> = ({ data }) => {
             </tr>
           </thead>
           <tbody>
-            {paged.map((row, i) => (
-              <tr key={i} className="border-b border-slate-100 hover:bg-slate-50">
+            {paged.map((row, idx) => (
+              <tr key={`${row.name}-${idx}`} className="border-b border-slate-100 hover:bg-slate-50">
                 <td className="px-3 py-3">{row.name}</td>
                 <td className="px-3 py-3">{row.features} Features</td>
                 <td className="px-3 py-3">
@@ -191,15 +198,15 @@ const RoleTable: React.FC<Props> = ({ data }) => {
                   <div className="flex items-center justify-center gap-2">
                     <button
                       type="button"
-                      className="rounded-md p-1 text-violet-700 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                      className="rounded-md p-1 text-violet-700 transition hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil className="h-4 w-4" aria-hidden />
                     </button>
                     <button
                       type="button"
-                      className="rounded-md p-1 text-violet-700 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                      className="rounded-md p-1 text-violet-700 transition hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4" aria-hidden />
                     </button>
                   </div>
                 </td>
@@ -209,16 +216,15 @@ const RoleTable: React.FC<Props> = ({ data }) => {
         </table>
       </div>
 
-      {/* Footer: cukup render Pagination reusable */}
       <div className="mt-6">
         <Pagination
           total={total}
-          page={page}
+          page={currentPage}
           pageSize={pageSize}
           onPageChange={setPage}
-          onPageSizeChange={(sz) => {
-            setPageSize(sz);
-            setPage(1); // reset saat page size berubah
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
           }}
         />
       </div>
