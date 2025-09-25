@@ -115,7 +115,7 @@ export default function DashboardPage() {
   // Period
   const [period, setPeriod] = useState<{ month: number; year: number }>({ month: 7, year: 2025 });
 
-  // Dropdown open states (untuk panah atas/bawah)
+  // Dropdown states
   const [openMonth, setOpenMonth] = useState(false);
   const [openYear, setOpenYear] = useState(false);
   const [openClass, setOpenClass] = useState(false);
@@ -125,8 +125,11 @@ export default function DashboardPage() {
   const [query, setQuery] = useState("");
   const [classFilter, setClassFilter] = useState("All Class");
   const [statusFilter, setStatusFilter] = useState("All Status");
+
+  // Pagination state (dipakai komponen Pagination)
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(4);
+
   const [sortKey, setSortKey] = useState<keyof PaymentRow>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
@@ -168,36 +171,12 @@ export default function DashboardPage() {
 
   const periodLabel = `${months[period.month]}, ${period.year}`;
 
-  // === Overview data (pakai OverviewCard) ===
+  // === Overview data ===
   const overview = [
-    {
-      title: "Active Teachers",
-      subtitle: "Total Active Teachers Count",
-      value: 24,
-      accent: "primary" as const,
-      icon: <Presentation className="h-5 w-5" />,
-    },
-    {
-      title: "Active Students",
-      subtitle: "Total Active Students Count",
-      value: 325,
-      accent: "default" as const,
-      icon: <GraduationCap className="h-5 w-5" />,
-    },
-    {
-      title: "Parents",
-      subtitle: "Total Parents Count",
-      value: 310,
-      accent: "default" as const,
-      icon: <Users className="h-5 w-5" />,
-    },
-    {
-      title: "Active Admin",
-      subtitle: "Total Active Admin Count",
-      value: 8,
-      accent: "default" as const,
-      icon: <Shield className="h-5 w-5" />,
-    },
+    { title: "Active Teachers", subtitle: "Total Active Teachers Count", value: 24, accent: "primary" as const, icon: <Presentation className="h-5 w-5" /> },
+    { title: "Active Students", subtitle: "Total Active Students Count", value: 325, accent: "default" as const, icon: <GraduationCap className="h-5 w-5" /> },
+    { title: "Parents", subtitle: "Total Parents Count", value: 310, accent: "default" as const, icon: <Users className="h-5 w-5" /> },
+    { title: "Active Admin", subtitle: "Total Active Admin Count", value: 8, accent: "default" as const, icon: <Shield className="h-5 w-5" /> },
   ];
 
   return (
@@ -214,21 +193,14 @@ export default function DashboardPage() {
               👋 Welcome, Dafa Aulia, have a great day !
             </h1>
 
-            {/* === Overview (match desain: 1 ungu, 3 putih) === */}
+            {/* Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
               {overview.map((o) => (
-                <OverviewCard
-                  key={o.title}
-                  title={o.title}
-                  subtitle={o.subtitle}
-                  value={o.value}
-                  accent={o.accent}
-                  icon={o.icon}
-                />
+                <OverviewCard key={o.title} {...o} />
               ))}
             </div>
 
-            {/* === Student Tuition Payments === */}
+            {/* Student Tuition Payments */}
             <SectionCard
               title="Student Tuition Payments"
               headerRight={
@@ -238,7 +210,7 @@ export default function DashboardPage() {
                     <span>Current Period ({periodLabel})</span>
                   </div>
 
-                  {/* Bulan */}
+                  {/* Month */}
                   <div className="relative">
                     <select
                       value={period.month}
@@ -256,7 +228,7 @@ export default function DashboardPage() {
                     )}
                   </div>
 
-                  {/* Tahun */}
+                  {/* Year */}
                   <div className="relative">
                     <select
                       value={period.year}
@@ -391,20 +363,18 @@ export default function DashboardPage() {
                 </table>
               </div>
 
-              {/* Footer */}
-              <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="text-sm text-gray-700 flex items-center gap-2">
-                  <span>Showing</span>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                    className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
-                  >
-                    {[4, 10, 25].map((n) => <option key={n} value={n}>{n}</option>)}
-                  </select>
-                  <span>from {total} data</span>
-                </div>
-                <Pagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
+              {/* Footer -> pakai Pagination reusable */}
+              <div className="mt-4">
+                <Pagination
+                  total={total}
+                  page={currentPage}
+                  pageSize={pageSize}
+                  onPageChange={setPage}
+                  onPageSizeChange={(sz) => {
+                    setPageSize(sz);
+                    setPage(1);
+                  }}
+                />
               </div>
             </SectionCard>
           </main>

@@ -3,12 +3,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import Sidebar from "../../../components/admin/Sidebar";
 import Topbar from "../../../components/layout-global/Topbar";
 import Pagination from "../../../components/layout-global/Pagination";
+import PageHeader from "../../../components/layout-global/PageHeader";
 import {
   Search,
   Download,
   Eye,
   Flag,
   ChevronDown,
+  GraduationCap, // ikon untuk header
 } from "lucide-react";
 
 // Tipe data siswa
@@ -54,7 +56,7 @@ const buildInitialStudents = (): Student[] => {
 
 // Utility: export ke CSV dan trigger download di client
 const downloadCSV = (rows: Student[]) => {
-  const header = ["Student ID", "Student Name", "Student Email", "Current Class", "Status", "Flag"]; 
+  const header = ["Student ID", "Student Name", "Student Email", "Current Class", "Status", "Flag"];
   const body = rows.map((s) => [s.id, s.name, s.email ?? "- -", s.currentClass, s.status, s.flag]);
   const csv = [header, ...body].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -71,9 +73,8 @@ const downloadCSV = (rows: Student[]) => {
 // Badge status helper
 const StatusBadge = ({ status }: { status: Student["status"] }) => (
   <span
-    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-      status === "Active" ? "bg-[#e6f7ed] text-green-700" : "bg-[#ffe9e7] text-red-600"
-    }`}
+    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${status === "Active" ? "bg-[#e6f7ed] text-green-700" : "bg-[#ffe9e7] text-red-600"
+      }`}
   >
     {status}
   </span>
@@ -129,7 +130,6 @@ const StudentsPage: React.FC = () => {
       const vb = b[sortKey];
       let cmp = 0;
       if (typeof va === "string" && typeof vb === "string") cmp = va.localeCompare(vb, undefined, { numeric: true });
-      // For status ordering, keep natural string compare
       return sortDir === "asc" ? cmp : -cmp;
     });
     return rows;
@@ -166,16 +166,11 @@ const StudentsPage: React.FC = () => {
           <Topbar onToggleSidebar={() => setSidebarOpen((s) => !s)} />
 
           <main className="relative z-0 ml-64 px-6 lg:px-10 py-6 space-y-6">
-            {/* Header card with title */}
-            <section className="bg-white rounded-xl shadow-sm border border-[#ececec] p-6">
-              <div className="flex items-center gap-3">
-                {/* Graduation cap icon (using flag as placeholder to keep dependencies minimal) */}
-                <div className="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center">
-                  <Flag className="w-5 h-5 text-[#6c2bd9]" />
-                </div>
-                <h1 className="text-xl font-semibold text-gray-900">Students Data</h1>
-              </div>
-            </section>
+            {/* === Reusable PageHeader === */}
+            <PageHeader
+              title="Students Data"
+              icon={<GraduationCap className="w-5 h-5 text-[#6c2bd9]" aria-hidden />}
+            />
 
             {/* Filters + Download */}
             <section className="bg-white rounded-xl shadow-sm border border-[#ececec] p-6">
@@ -296,7 +291,9 @@ const StudentsPage: React.FC = () => {
                           >
                             <span>{col.label}</span>
                             {col.key !== "action" && (
-                              <span className="text-xs text-gray-400">{sortKey === (col.key as keyof Student) ? (sortDir === "asc" ? "▲" : "▼") : "—"}</span>
+                              <span className="text-xs text-gray-400">
+                                {sortKey === (col.key as keyof Student) ? (sortDir === "asc" ? "▲" : "▼") : "—"}
+                              </span>
                             )}
                           </button>
                         </th>
@@ -342,30 +339,15 @@ const StudentsPage: React.FC = () => {
               </div>
 
               {/* Footer: page size + pagination */}
-              <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="text-sm text-gray-700 flex items-center gap-2">
-                  <span>Showing</span>
-                  <select
-                    aria-label="Rows per page"
-                    value={pageSize}
-                    onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                    className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]"
-                  >
-                    {[4, 10, 25].map((n) => (
-                      <option key={n} value={n}>{n}</option>
-                    ))}
-                  </select>
-                  <span>from {total} data</span>
-                </div>
 
-                <div className="flex items-center gap-3">
-                  <Pagination page={currentPage} pageCount={pageCount} onPageChange={(p) => setPage(p)} />
-                  {/* Mock checkbox & Go >> */}
-                  <label className="inline-flex items-center gap-2 text-sm text-gray-600">
-                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300" />
-                    <span>Go &gt;&gt;</span>
-                  </label>
-                </div>
+              <div className="flex items-center gap-3">
+                <Pagination
+                  total={total}
+                  page={currentPage}
+                  pageSize={pageSize}
+                  onPageChange={setPage}
+                  onPageSizeChange={(sz) => { setPageSize(sz); setPage(1); }}
+                />
               </div>
             </section>
           </main>
