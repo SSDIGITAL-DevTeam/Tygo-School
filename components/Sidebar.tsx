@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const onLogout = async () => {
     try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
     handleNav();
-    router.push("/login");
+    router.push("/");
     router.refresh();
   };
 
