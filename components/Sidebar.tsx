@@ -81,16 +81,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               {/* Dashboard (leaf) */}
               <li>
                 <Link
-                  href="/dashboard"
+                  href="/admin/dashboard"
                   onClick={handleNav}
                   className={`flex items-center gap-3 px-4 py-2 rounded-md ${
-                    starts("/dashboard") || pathname === "/" ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
+                    starts("/admin/dashboard") || pathname === "/" ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
                   }`}
                 >
                   <IconWrap>
                     <LayoutDashboard
                       className={`w-5 h-5 ${
-                        starts("/dashboard") || pathname === "/" ? "text-white" : "text-gray-700"
+                        starts("/admin/dashboard") || pathname === "/" ? "text-white" : "text-gray-700"
                       }`}
                     />
                   </IconWrap>
@@ -103,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 <button
                   onClick={() => setOpenMaster(v => !v)}
                   className={`w-full flex items-center justify-between px-4 py-2 rounded-md ${
-                    starts("/master-data") || openMaster ? PARENT_OPEN : PARENT_BASE
+                    starts("/admin/master-data") || openMaster ? PARENT_OPEN : PARENT_BASE
                   }`}
                   aria-expanded={openMaster}
                   aria-controls="master-children"
@@ -112,18 +112,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     <IconWrap>
                       <BookOpen
                         className={`w-5 h-5 ${
-                          starts("/master-data") || openMaster ? "text-gray-700" : "text-gray-700"
+                          starts("/admin/master-data") || openMaster ? "text-gray-700" : "text-gray-700"
                         }`}
                       />
                     </IconWrap>
-                    <span className={starts("/master-data") ? "font-semibold" : "font-medium"}>
+                    <span className={starts("/admin/master-data") ? "font-semibold" : "font-medium"}>
                       Master Data
                     </span>
                   </span>
                   <ChevronDown
                     className={`w-4 h-4 transition-transform ${
                       openMaster ? "rotate-180" : ""
-                    } ${starts("/master-data") || openMaster ? "text-gray-700" : "text-gray-500"}`}
+                    } ${starts("/admin/master-data") || openMaster ? "text-gray-700" : "text-gray-500"}`}
                   />
                 </button>
 
@@ -131,10 +131,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   <ul id="master-children" className="mt-1 space-y-1">
                     <li>
                       <Link
-                        href="/master-data/subjects"
+                        href="/admin/master-data/subjects"
                         onClick={handleNav}
                         className={`block pl-11 pr-4 py-2 rounded-md ${
-                          isRoute("/master-data/subjects") ? CHILD_ACTIVE : CHILD_BASE
+                          isRoute("/admin/master-data/subjects") ? CHILD_ACTIVE : CHILD_BASE
                         }`}
                       >
                         Subjects
@@ -142,10 +142,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </li>
                     <li>
                       <Link
-                        href="/master-data/teachers-management/teacher-list"
+                        href="/admin/master-data/teachers-management/teacher-list"
                         onClick={handleNav}
                         className={`block pl-11 pr-4 py-2 rounded-md ${
-                          starts("/master-data/teachers-management/teacher-list") ? CHILD_ACTIVE : CHILD_BASE
+                          starts("/admin/master-data/teachers-management/teacher-list") ? CHILD_ACTIVE : CHILD_BASE
                         }`}
                       >
                         Teachers
@@ -153,10 +153,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </li>
                     <li>
                       <Link
-                        href="/master-data/student-report/assessment-category"
+                        href="/admin/master-data/student-report/assessment-category"
                         onClick={handleNav}
                         className={`block pl-11 pr-4 py-2 rounded-md ${
-                          isRoute("/master-data/student-report/assessment-category") ? CHILD_ACTIVE : CHILD_BASE
+                          isRoute("/admin/master-data/student-report/assessment-category") ? CHILD_ACTIVE : CHILD_BASE
                         }`}
                       >
                         Students Report Format
@@ -164,10 +164,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </li>
                     <li>
                       <Link
-                        href="/master-data/classes"
+                        href="/admin/master-data/classes"
                         onClick={handleNav}
                         className={`block pl-11 pr-4 py-2 rounded-md ${
-                          isRoute("/master-data/classes") ? CHILD_ACTIVE : CHILD_BASE
+                          isRoute("/admin/master-data/classes") ? CHILD_ACTIVE : CHILD_BASE
                         }`}
                       >
                         Classes
@@ -180,14 +180,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               {/* Students Data (leaf) */}
               <li>
                 <Link
-                  href="/students"
+                  href="/admin/students"
                   onClick={handleNav}
                   className={`flex items-center gap-3 px-4 py-2 rounded-md ${
-                    starts("/students") ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
+                    starts("/admin/students") ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
                   }`}
                 >
                   <IconWrap>
-                    <GraduationCap className={`w-5 h-5 ${starts("/students") ? "text-white" : "text-gray-700"}`} />
+                    <GraduationCap className={`w-5 h-5 ${starts("/admin/students") ? "text-white" : "text-gray-700"}`} />
                   </IconWrap>
                   Students Data
                 </Link>
@@ -198,21 +198,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 <button
                   onClick={() => setOpenRole(v => !v)}
                   className={`w-full flex items-center justify-between px-4 py-2 rounded-md ${
-                    starts("/role-access") || openRole ? PARENT_OPEN : PARENT_BASE
+                    starts("/admin/role-access") || openRole ? PARENT_OPEN : PARENT_BASE
                   }`}
                   aria-expanded={openRole}
                   aria-controls="role-children"
                 >
                   <span className="flex items-center gap-3">
                     <IconWrap>
-                      <Users className={`w-5 h-5 ${starts("/role-access") || openRole ? "text-gray-700" : "text-gray-700"}`} />
+                      <Users className={`w-5 h-5 ${starts("/admin/role-access") || openRole ? "text-gray-700" : "text-gray-700"}`} />
                     </IconWrap>
-                    <span className={starts("/role-access") ? "font-semibold" : "font-medium"}>Role &amp; Access</span>
+                    <span className={starts("/admin/role-access") ? "font-semibold" : "font-medium"}>Role &amp; Access</span>
                   </span>
                   <ChevronDown
                     className={`w-4 h-4 transition-transform ${
                       openRole ? "rotate-180" : ""
-                    } ${starts("/role-access") || openRole ? "text-gray-700" : "text-gray-500"}`}
+                    } ${starts("/admin/role-access") || openRole ? "text-gray-700" : "text-gray-500"}`}
                   />
                 </button>
 
@@ -220,10 +220,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   <ul id="role-children" className="mt-1 space-y-1">
                     <li>
                       <Link
-                        href="/role-access/role-management"
+                        href="/admin/role-access/role-management"
                         onClick={handleNav}
                         className={`block pl-11 pr-4 py-2 rounded-md ${
-                          starts("/role-access/role-management") ? CHILD_ACTIVE : CHILD_BASE
+                          starts("/admin/role-access/role-management") ? CHILD_ACTIVE : CHILD_BASE
                         }`}
                       >
                         Role Management
@@ -231,10 +231,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </li>
                     <li>
                       <Link
-                        href="/role-access/admin-list"
+                        href="/admin/role-access/admin-list"
                         onClick={handleNav}
                         className={`block pl-11 pr-4 py-2 rounded-md ${
-                          starts("/role-access/admin-list") ? CHILD_ACTIVE : CHILD_BASE
+                          starts("/admin/role-access/admin-list") ? CHILD_ACTIVE : CHILD_BASE
                         }`}
                       >
                         Admin List
@@ -247,14 +247,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               {/* Tuition (leaf) */}
               <li>
                 <Link
-                  href="/tuition"
+                  href="/admin/tuition"
                   onClick={handleNav}
                   className={`flex items-center gap-3 px-4 py-2 rounded-md ${
-                    starts("/tuition") ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
+                    starts("/admin/tuition") ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
                   }`}
                 >
                   <IconWrap>
-                    <DollarSign className={`w-5 h-5 ${starts("/tuition") ? "text-white" : "text-gray-700"}`} />
+                    <DollarSign className={`w-5 h-5 ${starts("/admin/tuition") ? "text-white" : "text-gray-700"}`} />
                   </IconWrap>
                   Tuition Fee Management
                 </Link>
@@ -263,14 +263,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               {/* Settings (leaf) */}
               <li>
                 <Link
-                  href="/school-settings"
+                  href="/admin/school-settings"
                   onClick={handleNav}
                   className={`flex items-center gap-3 px-4 py-2 rounded-md ${
                     starts("/school-settings") ? `${ACTIVE_PURPLE} font-semibold` : PARENT_BASE
                   }`}
                 >
                   <IconWrap>
-                    <Settings className={`w-5 h-5 ${starts("/school-settings") ? "text-white" : "text-gray-700"}`} />
+                    <Settings className={`w-5 h-5 ${starts("/admin/school-settings") ? "text-white" : "text-gray-700"}`} />
                   </IconWrap>
                   School Settings
                 </Link>
