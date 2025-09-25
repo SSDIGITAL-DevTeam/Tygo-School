@@ -25,6 +25,7 @@ import {
   SubjectRecord,
   SUBJECT_STATUS_FILTERS,
 } from "./subject-data";
+import AddButton from "@/components/layout-global/AddButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,12 +42,12 @@ const columns: Array<{
   label: string;
   sortable?: boolean;
 }> = [
-  { key: "code", label: "Subject Code", sortable: true },
-  { key: "name", label: "Subject Name", sortable: true },
-  { key: "description", label: "Description", sortable: true },
-  { key: "status", label: "Status" },
-  { key: "action", label: "Action" },
-];
+    { key: "code", label: "Subject Code", sortable: true },
+    { key: "name", label: "Subject Name", sortable: true },
+    { key: "description", label: "Description", sortable: true },
+    { key: "status", label: "Status" },
+    { key: "action", label: "Action" },
+  ];
 
 const SubjectManagementPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -166,16 +167,11 @@ const SubjectManagementPage: React.FC = () => {
                   <h2 className="text-lg font-semibold text-gray-900">
                     Subjects List
                   </h2>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push("/master-data/subjects/add-subject")
-                    }
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#5922b8]"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Subject
-                  </button>
+                  
+                  <div className="flex justify-end">
+                    <AddButton entity="Subject" href="/admin/master-data/subjects/add-subject" />
+                    {/* Renders: “Add Role” with the purple pill styling */}
+                  </div>
                 </div>
 
                 {/* Baris Filter + Search (kiri) dan Download (kanan) */}

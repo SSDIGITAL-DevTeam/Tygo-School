@@ -11,6 +11,7 @@ import {
   Plus,
   Search,
 } from "lucide-react";
+import AddButton from "@/components/layout-global/AddButton";
 
 type StatusFilter = "All" | "Active" | "Non Active";
 
@@ -131,14 +132,11 @@ const AssessmentCategoryPage = () => {
           </h2>
         </div>
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-          <button
-            type="button"
-            onClick={() => router.push("/master-data/student-report/assessment-category/add-category")}
-            className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#581c87]"
-          >
-            <Plus className="h-4 w-4" />
-            Add New Category
-          </button>
+          
+          <div className="flex justify-end">
+            <AddButton entity="New Category" href="/admin/master-data/student-report/assessment-category/add-category" />
+            {/* Renders: “Add Role” with the purple pill styling */}
+          </div>
         </div>
       </header>
 
@@ -165,11 +163,10 @@ const AssessmentCategoryPage = () => {
                         setCategoryStatus(option);
                         setCategoryFilterOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left transition ${
-                        categoryStatus === option
+                      className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left transition ${categoryStatus === option
                           ? "bg-[#f3e8ff] text-[#6c2bd9]"
                           : "text-gray-600 hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       <span>{option}</span>
                       {categoryStatus === option && (
@@ -316,11 +313,10 @@ const AssessmentCategoryPage = () => {
                     key={p}
                     type="button"
                     onClick={() => setPage(p)}
-                    className={`rounded-md border px-3 py-1.5 text-sm transition ${
-                      p === page
+                    className={`rounded-md border px-3 py-1.5 text-sm transition ${p === page
                         ? "bg-[#6c2bd9] text-white"
                         : "bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
+                      }`}
                     aria-current={p === page ? "page" : undefined}
                   >
                     {p}

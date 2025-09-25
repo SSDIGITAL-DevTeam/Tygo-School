@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { getTeacherList, TeacherRecord } from "../teacher-data";
+import AddButton from "@/components/layout-global/AddButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -230,14 +231,11 @@ const TeacherManagementPage: React.FC = () => {
                   </h2>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => router.push("/master-data/teachers-management/add-teacher")}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#581c87]"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Teacher
-                  </button>
+                  
+                  <div className="flex justify-end">
+                    <AddButton entity="Teacher" href="/admin/master-data/teachers-management/add-teacher" />
+                    {/* Renders: “Add Role” with the purple pill styling */}
+                  </div>
                 </div>
               </div>
 
@@ -250,11 +248,10 @@ const TeacherManagementPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setShowFilter((open) => !open)}
-                        className={`inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-                          showFilter || statusFilter !== "All"
+                        className={`inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${showFilter || statusFilter !== "All"
                             ? "border-[#6c2bd9] text-[#6c2bd9] bg-purple-50"
                             : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                        }`}
+                          }`}
                         aria-expanded={showFilter}
                       >
                         <Filter className="w-4 h-4" />
@@ -289,11 +286,10 @@ const TeacherManagementPage: React.FC = () => {
                                       option as typeof statusFilter
                                     )
                                   }
-                                  className={`w-full rounded-md px-3 py-2 text-left transition-colors ${
-                                    statusFilter === option
+                                  className={`w-full rounded-md px-3 py-2 text-left transition-colors ${statusFilter === option
                                       ? "bg-purple-100 text-[#6c2bd9] font-semibold"
                                       : "hover:bg-gray-100"
-                                  }`}
+                                    }`}
                                 >
                                   {option === "All" ? "All Status" : option}
                                 </button>

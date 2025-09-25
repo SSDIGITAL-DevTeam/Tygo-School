@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { getClassList, ClassRecord, CLASS_STATUS_FILTERS } from "./class-data";
+import AddButton from "@/components/layout-global/AddButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -202,16 +203,11 @@ const ClassManagementPage: React.FC = () => {
                     Class List
                   </h2>
                   <div className="flex flex-col gap-3 sm:flex-row">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push("/master-data/classes/add-class")
-                      }
-                      className="inline-flex items-center justify-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#5922b8]"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add Class
-                    </button>
+                    
+                    <div className="flex justify-end">
+                      <AddButton entity="Class" href="/admin/master-data/classes/add-class" />
+                      {/* Renders: “Add Role” with the purple pill styling */}
+                    </div>
                   </div>
                 </div>
 
@@ -265,8 +261,8 @@ const ClassManagementPage: React.FC = () => {
                             column.align === "center"
                               ? "text-center"
                               : column.align === "right"
-                              ? "text-right"
-                              : "text-left";
+                                ? "text-right"
+                                : "text-left";
 
                           return (
                             <th
