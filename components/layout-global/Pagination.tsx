@@ -1,78 +1,120 @@
 "use client";
-import React from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from "lucide-react";
 
 type PaginationProps = {
-  page: number; // 1-based
-  pageCount: number;
+  total: number;
+  page: number;
+  pageSize: number;
   onPageChange: (page: number) => void;
-  className?: string;
+  onPageSizeChange?: (size: number) => void;
+  pageSizeOptions?: number[];
 };
 
-// Reusable pagination with first/prev/next/last and compact numbers with ellipsis
-const Pagination: React.FC<PaginationProps> = ({ page, pageCount, onPageChange, className }) => {
-  if (pageCount <= 1) return null;
+export default function Pagination({
+  total,
+  page,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+  pageSizeOptions = [4, 10, 20, 50],
+}: PaginationProps) {
+  const totalPages = Math.max(1, Math.ceil(total / Math.max(1, pageSize)));
+  const [goto, setGoto] = useState<number | "">("");
 
-  const go = (p: number) => onPageChange(Math.min(Math.max(1, p), pageCount));
+  const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
+  const go = (p: number) => onPageChange(clamp(p, 1, totalPages));
 
-  // Build visible pages: 1, current-1..current+1, last, with ellipsis
-  const pages: (number | "ellipsis")[] = [];
-  const add = (n: number) => pages.push(n);
-  const addEllipsis = () => {
-    if (pages[pages.length - 1] !== "ellipsis") pages.push("ellipsis");
-  };
-
-  add(1);
-  for (let p = page - 1; p <= page + 1; p++) {
-    if (p > 1 && p < pageCount) add(p);
-  }
-  if (pageCount > 1) add(pageCount);
-
-  // Ensure sorted unique with ellipsis
-  const uniqueSorted = Array.from(new Set(pages.filter((x) => x !== "ellipsis") as number[])).sort((a, b) => a - b);
-  const final: (number | "ellipsis")[] = [];
-  for (let i = 0; i < uniqueSorted.length; i++) {
-    const curr = uniqueSorted[i];
-    const prev = uniqueSorted[i - 1];
-    if (i > 0 && prev !== undefined && curr - prev > 1) final.push("ellipsis");
-    final.push(curr);
-  }
+  // 1 … (page-1) page (page+1) … last
+  const range = useMemo<(number | string)[]>(() => {
+    const DOTS = "...";
+    const out: (number | string)[] = [];
+    if (totalPages <= 4) {
+      for (let i = 1; i <= totalPages; i++) out.push(i);
+    } else if (page <= 3) {
+      out.push(1, 2, 3, DOTS, totalPages);
+    } else if (page >= totalPages - 2) {
+      out.push(1, DOTS, totalPages - 2, totalPages - 1, totalPages);
+    } else {
+      out.push(1, DOTS, page - 1, page, page + 1, DOTS, totalPages);
+    }
+    return out;
+  }, [page, totalPages]);
 
   return (
-    <div className={className}>
-      <div className="flex items-center gap-1">
-        <button aria-label="First page" onClick={() => go(1)} disabled={page === 1} className="p-2 rounded-md border bg-white hover:bg-gray-50 disabled:opacity-50">
-          <ChevronsLeft className="w-4 h-4" />
+    <div className="flex items-center justify-between rounded-b-xl bg-white px-6 py-5 text-sm text-gray-700 shadow-sm ring-1 ring-slate-200">
+      {/* Kiri */}
+      <div className="flex items-center gap-2">
+        Showing
+        <select
+          value={pageSize}
+          onChange={(e) => onPageSizeChange?.(parseInt(e.target.value, 10))}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1 focus:outline-none focus:ring-2 focus:ring-violet-500"
+        >
+          {pageSizeOptions.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+        from {total} data
+      </div>
+
+      {/* Kanan */}
+      <div className="flex items-center gap-3">
+        {/* panah tanpa box */}
+        <button onClick={() => go(1)} disabled={page === 1} className="disabled:opacity-30 hover:text-violet-600">
+          <ChevronsLeft className="h-5 w-5" />
         </button>
-        <button aria-label="Previous page" onClick={() => go(page - 1)} disabled={page === 1} className="p-2 rounded-md border bg-white hover:bg-gray-50 disabled:opacity-50">
-          <ChevronLeft className="w-4 h-4" />
+        <button onClick={() => go(page - 1)} disabled={page === 1} className="disabled:opacity-30 hover:text-violet-600">
+          <ChevronLeft className="h-5 w-5" />
         </button>
-        {final.map((it, idx) =>
-          it === "ellipsis" ? (
-            <span key={`e-${idx}`} className="px-2 text-gray-500 select-none">…</span>
-          ) : (
-            <button
-              key={it}
-              aria-current={it === page ? "page" : undefined}
-              onClick={() => go(it)}
-              className={`px-3 py-1.5 rounded-full border text-sm ${
-                it === page ? "bg-[#6c2bd9] text-white border-transparent" : "bg-white hover:bg-gray-50 text-gray-700"
-              }`}
-            >
-              {it}
-            </button>
-          )
-        )}
-        <button aria-label="Next page" onClick={() => go(page + 1)} disabled={page === pageCount} className="p-2 rounded-md border bg-white hover:bg-gray-50 disabled:opacity-50">
-          <ChevronRight className="w-4 h-4" />
+
+        {/* angka: font kecil (text-sm) dan aktif = KOTAK UNGU kecil */}
+        <div className="flex items-center gap-2">
+          {range.map((item, idx) =>
+            item === "..." ? (
+              <span key={`dots-${idx}`} className="px-1 text-gray-500">…</span>
+            ) : (
+              <button
+                key={item as number}
+                onClick={() => go(item as number)}
+                className={[
+                  "flex items-center justify-center text-sm font-medium transition",
+                  // ukuran kecil supaya selaras dengan teks "Showing"
+                  page === item
+                    ? "h-7 w-7 rounded-lg bg-violet-600 text-white" // KOTAK UNGU (bukan lingkaran)
+                    : "h-7 w-7 rounded-lg text-gray-900 hover:bg-violet-100 hover:text-violet-700",
+                ].join(" ")}
+              >
+                {item}
+              </button>
+            )
+          )}
+        </div>
+
+        <button onClick={() => go(page + 1)} disabled={page === totalPages} className="disabled:opacity-30 hover:text-violet-600">
+          <ChevronRight className="h-5 w-5" />
         </button>
-        <button aria-label="Last page" onClick={() => go(pageCount)} disabled={page === pageCount} className="p-2 rounded-md border bg-white hover:bg-gray-50 disabled:opacity-50">
-          <ChevronsRight className="w-4 h-4" />
+        <button onClick={() => go(totalPages)} disabled={page === totalPages} className="disabled:opacity-30 hover:text-violet-600">
+          <ChevronsRight className="h-5 w-5" />
+        </button>
+
+        {/* input Go agak besar biar enak diklik */}
+        <input
+          type="number"
+          min={1}
+          max={totalPages}
+          value={goto}
+          onChange={(e) => setGoto(e.target.value === "" ? "" : Number(e.target.value))}
+          onKeyDown={(e) => e.key === "Enter" && goto !== "" && go(Number(goto))}
+          className="ml-2 h-9 w-16 rounded-md border border-slate-300 px-3 text-center text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+        />
+        <button
+          onClick={() => goto !== "" && go(Number(goto))}
+          className="ml-1 text-violet-700 decoration-violet-300 hover:decoration-violet-500"
+        >
+          Go &gt;&gt;
         </button>
       </div>
     </div>
   );
-};
-
-export default Pagination;
-
+}
