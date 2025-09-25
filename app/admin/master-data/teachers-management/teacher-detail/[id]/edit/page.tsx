@@ -3,27 +3,27 @@
 import React, { useMemo, useState } from "react";
 import { Inter } from "next/font/google";
 import { useParams, useRouter } from "next/navigation";
-import Sidebar from "../../../../../../../components/admin/Sidebar";
-import Header from "../../../../../../../components/layout-global/Header";
-import ToggleSwitch from "../../../../../../../components/layout-global/ToggleSwitch";
-import ConfirmDialog from "../../../../../../../components/layout-global/ConfirmDialog";
-import {
-  ArrowLeft,
-  BookOpen,
-  CheckCircle2,
-  Plus,
-  X,
-} from "lucide-react";
+import dynamic from "next/dynamic";
+import { ArrowLeft, BookOpen, CheckCircle2, Plus, X } from "lucide-react";
+
+// UI components (dibuat dynamic untuk aman di Client)
+const Sidebar = dynamic(() => import("@/components/admin/Sidebar"), { ssr: false });
+const Header = dynamic(() => import("@/components/layout-global/Header"), { ssr: false });
+const ToggleSwitch = dynamic(() => import("@/components/layout-global/ToggleSwitch"), { ssr: false });
+const ConfirmDialog = dynamic(() => import("@/components/layout-global/ConfirmDialog"), { ssr: false });
+
+// Data helpers (ubah path ini jika lokasi file Anda berbeda)
 import {
   getTeacherById,
   PHONE_PREFIXES,
   SUBJECT_OPTIONS,
   TeacherStatus,
-} from "../../../teacher-data";
+} from "@/app/admin/master-data/teachers-management/teacher-data";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const TEACHER_LIST_PATH = "/master-data/teachers-management/teacher-list";
+const TEACHER_LIST_PATH =
+  "/admin/master-data/teachers-management/teacher-detail";
 
 const AddTagButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <button
@@ -38,29 +38,34 @@ const AddTagButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
 
 const TeacherEditPage: React.FC = () => {
   const router = useRouter();
-  const params = useParams<{ id: string }>();
-  const teacherId = useMemo(() => decodeURIComponent(String(params?.id ?? "")), [params]);
+  const params = useParams() as { id?: string };
+  const teacherId = useMemo(
+    () => decodeURIComponent(String(params?.id ?? "")),
+    [params]
+  );
+
   const teacher = useMemo(() => getTeacherById(teacherId), [teacherId]);
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [saved, setSaved] = useState(false);
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (!teacher) {
     return (
       <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
         <div className="flex">
-          <Sidebar
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-          />
+          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           <div className="flex-1 min-h-screen flex flex-col">
-            <Header onToggleSidebar={() => setSidebarOpen((value) => !value)} />
+            <Header onToggleSidebar={() => setSidebarOpen((v) => !v)} />
             <main className="relative z-0 ml-64 p-4 md:p-6 lg:p-8">
               <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-                <h1 className="text-xl font-semibold text-gray-900">Teacher Not Found</h1>
-                <p className="mt-2 text-sm text-gray-600">We couldn't locate the requested teacher. Please return to the teacher list.</p>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  Teacher Not Found
+                </h1>
+                <p className="mt-2 text-sm text-gray-600">
+                  We couldn&apos;t locate the requested teacher. Please return
+                  to the teacher list.
+                </p>
                 <button
                   type="button"
                   onClick={() => router.push(TEACHER_LIST_PATH)}
@@ -76,10 +81,13 @@ const TeacherEditPage: React.FC = () => {
     );
   }
 
+  // States
   const [teacherIdState, setTeacherIdState] = useState(teacher.id);
   const [fullName, setFullName] = useState(teacher.fullName);
   const [email, setEmail] = useState(teacher.email);
-  const [phonePrefix, setPhonePrefix] = useState(teacher.phonePrefix ?? PHONE_PREFIXES[0]);
+  const [phonePrefix, setPhonePrefix] = useState(
+    teacher.phonePrefix ?? PHONE_PREFIXES[0]
+  );
   const [phoneNumber, setPhoneNumber] = useState(teacher.phoneNumber ?? "");
   const [status, setStatus] = useState<TeacherStatus>(teacher.status);
   const [subjectSelections, setSubjectSelections] = useState<string[]>(
@@ -92,13 +100,15 @@ const TeacherEditPage: React.FC = () => {
     [subjectSelections]
   );
 
-  const addSubjectField = () => setSubjectSelections((prev) => [...prev, ""]);
+  // Subject helpers
+  const addSubjectField = () =>
+    setSubjectSelections((prev) => [...prev, ""]);
   const removeSubjectAt = (index: number) =>
     setSubjectSelections((prev) => prev.filter((_, i) => i !== index));
   const updateSubjectAt = (index: number, value: string) => {
     setSubjectSelections((prev) => {
       if (value && prev.some((item, i) => i !== index && item === value)) {
-        return prev;
+        return prev; // cegah duplikasi
       }
       const copy = [...prev];
       copy[index] = value;
@@ -106,8 +116,9 @@ const TeacherEditPage: React.FC = () => {
     });
   };
 
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  // Submit
+  const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
     setShowConfirm(true);
   };
 
@@ -115,7 +126,8 @@ const TeacherEditPage: React.FC = () => {
     setShowConfirm(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
-    // Demo only: log payload to console
+
+    // Demo only
     const payload = {
       id: teacherIdState,
       fullName,
@@ -131,11 +143,17 @@ const TeacherEditPage: React.FC = () => {
     <nav aria-label="Breadcrumb" className="text-sm text-gray-600 mb-4">
       <ol className="flex items-center gap-2">
         <li>Master Data</li>
-        <li aria-hidden className="text-gray-400">/</li>
+        <li aria-hidden className="text-gray-400">
+          /
+        </li>
         <li>Manage Teachers</li>
-        <li aria-hidden className="text-gray-400">/</li>
+        <li aria-hidden className="text-gray-400">
+          /
+        </li>
         <li>Teacher Detail</li>
-        <li aria-hidden className="text-gray-400">/</li>
+        <li aria-hidden className="text-gray-400">
+          /
+        </li>
         <li className="text-gray-900 font-medium">Edit Teacher</li>
       </ol>
     </nav>
@@ -144,14 +162,12 @@ const TeacherEditPage: React.FC = () => {
   return (
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
       <div className="flex">
-        <Sidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="flex-1 min-h-screen flex flex-col">
-          <Header onToggleSidebar={() => setSidebarOpen((value) => !value)} />
+          <Header onToggleSidebar={() => setSidebarOpen((v) => !v)} />
           <main className="relative z-0 ml-64 p-4 md:p-6 lg:p-8 space-y-6">
             {breadcrumb}
+
             <section className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 flex items-center justify-between">
               <div className="flex items-start gap-4">
                 <button
@@ -167,8 +183,12 @@ const TeacherEditPage: React.FC = () => {
                     <BookOpen className="h-6 w-6" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-semibold text-gray-900">Edit Teacher</h1>
-                    <p className="text-sm text-gray-500">{teacher.fullName}</p>
+                    <h1 className="text-xl font-semibold text-gray-900">
+                      Edit Teacher
+                    </h1>
+                    <p className="text-sm text-gray-500">
+                      {teacher.fullName}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -198,7 +218,7 @@ const TeacherEditPage: React.FC = () => {
                     element={
                       <input
                         value={teacherIdState}
-                        onChange={(event) => setTeacherIdState(event.target.value)}
+                        onChange={(e) => setTeacherIdState(e.target.value)}
                         className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/40"
                       />
                     }
@@ -208,7 +228,7 @@ const TeacherEditPage: React.FC = () => {
                     element={
                       <input
                         value={fullName}
-                        onChange={(event) => setFullName(event.target.value)}
+                        onChange={(e) => setFullName(e.target.value)}
                         className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/40"
                       />
                     }
@@ -219,7 +239,7 @@ const TeacherEditPage: React.FC = () => {
                       <input
                         type="email"
                         value={email}
-                        onChange={(event) => setEmail(event.target.value)}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/40"
                       />
                     }
@@ -229,24 +249,27 @@ const TeacherEditPage: React.FC = () => {
                     element={
                       <div className="flex flex-col gap-3">
                         {subjectSelections.map((value, index) => (
-                          <div key={index} className="flex flex-wrap items-center gap-2">
+                          <div
+                            key={index}
+                            className="flex flex-wrap items-center gap-2"
+                          >
                             <select
                               value={value}
-                              onChange={(event) => updateSubjectAt(index, event.target.value)}
+                              onChange={(e) =>
+                                updateSubjectAt(index, e.target.value)
+                              }
                               className="w-full max-w-xs rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/40"
                             >
                               <option value="" disabled hidden>
                                 Select Subject
                               </option>
-                              {availableSubjects.map((subjectOption) => (
+                              {availableSubjects.map((opt) => (
                                 <option
-                                  key={subjectOption}
-                                  value={subjectOption}
-                                  disabled={
-                                    selectedSet.has(subjectOption) && subjectOption !== value
-                                  }
+                                  key={opt}
+                                  value={opt}
+                                  disabled={selectedSet.has(opt) && opt !== value}
                                 >
-                                  {subjectOption}
+                                  {opt}
                                 </option>
                               ))}
                             </select>
@@ -272,18 +295,22 @@ const TeacherEditPage: React.FC = () => {
                       <div className="flex w-full max-w-md items-center gap-2">
                         <select
                           value={phonePrefix}
-                          onChange={(event) => setPhonePrefix(event.target.value)}
+                          onChange={(e) => setPhonePrefix(e.target.value)}
                           className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/40"
                         >
-                          {PHONE_PREFIXES.map((option) => (
-                            <option key={option} value={option}>
-                              {option}
+                          {PHONE_PREFIXES.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
                             </option>
                           ))}
                         </select>
                         <input
                           value={phoneNumber}
-                          onChange={(event) => setPhoneNumber(event.target.value.replace(/[^0-9 -]/g, ""))}
+                          onChange={(e) =>
+                            setPhoneNumber(
+                              e.target.value.replace(/[^0-9 -]/g, "")
+                            )
+                          }
                           placeholder="Enter Phone Number"
                           className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/40"
                         />
@@ -298,11 +325,14 @@ const TeacherEditPage: React.FC = () => {
                         label="Status"
                         className="[&_label]:sr-only"
                         checked={status === "Active"}
-                        onChange={(checked) => setStatus(checked ? "Active" : "Non Active")}
+                        onChange={(checked) =>
+                          setStatus(checked ? "Active" : "Non Active")
+                        }
                       />
                     }
                   />
                 </div>
+
                 <div className="flex justify-end">
                   <button
                     type="submit"
@@ -316,6 +346,7 @@ const TeacherEditPage: React.FC = () => {
           </main>
         </div>
       </div>
+
       <ConfirmDialog
         open={showConfirm}
         title="Save changes?"
@@ -336,7 +367,7 @@ type FieldRowProps = {
 
 const FieldRow: React.FC<FieldRowProps> = ({ label, element }) => (
   <label className="grid items-center gap-3 text-sm md:grid-cols-[180px,1fr]">
-    <span className="justify-self-end text-right font-medium text-gray-700 whitespace-nowrap after:content-[':'] after:ml-1">
+    <span className="justify-self-end text-right font-medium text-gray-700 whitespace-nowrap after:ml-1 after:content-[':']">
       {label}
     </span>
     <div className="min-w-0">{element}</div>

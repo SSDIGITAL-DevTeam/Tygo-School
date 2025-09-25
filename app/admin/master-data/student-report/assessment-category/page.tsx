@@ -12,6 +12,8 @@ import {
   Search,
 } from "lucide-react";
 import AddButton from "@/components/layout-global/AddButton";
+import EditAction from "@/components/layout-global/EditAction";
+import ViewAction from "@/components/layout-global/ViewAction";
 
 type StatusFilter = "All" | "Active" | "Non Active";
 
@@ -123,6 +125,8 @@ const AssessmentCategoryPage = () => {
     return Array.from({ length: end - start + 1 }, (_, index) => start + index);
   }, [page, pageCount]);
 
+  const REPORT_BASE = "/admin/master-data/student-report/assessment-category";
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -132,7 +136,7 @@ const AssessmentCategoryPage = () => {
           </h2>
         </div>
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-          
+
           <div className="flex justify-end">
             <AddButton entity="New Category" href="/admin/master-data/student-report/assessment-category/add-category" />
             {/* Renders: “Add Role” with the purple pill styling */}
@@ -164,8 +168,8 @@ const AssessmentCategoryPage = () => {
                         setCategoryFilterOpen(false);
                       }}
                       className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left transition ${categoryStatus === option
-                          ? "bg-[#f3e8ff] text-[#6c2bd9]"
-                          : "text-gray-600 hover:bg-gray-50"
+                        ? "bg-[#f3e8ff] text-[#6c2bd9]"
+                        : "text-gray-600 hover:bg-gray-50"
                         }`}
                     >
                       <span>{option}</span>
@@ -239,20 +243,16 @@ const AssessmentCategoryPage = () => {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        className="rounded-md p-2 text-[#6c2bd9] transition hover:bg-purple-50"
-                        aria-label={`Edit ${row.name}`}
-                      >
-                        <PenSquare className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded-md p-2 text-[#6c2bd9] transition hover:bg-purple-50"
-                        aria-label={`View ${row.name}`}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
+                      <EditAction
+                        href={`${REPORT_BASE}/${encodeURIComponent(row.id)}/edit`}
+                        title={`Edit ${row.id}`}
+                      />
+
+                      {/* Kanan: View -> /admin/master-data/classes/class-detail?name={name} */}
+                      <ViewAction
+                        href={`${REPORT_BASE}/subject-detail?id=${encodeURIComponent(row.id)}`}
+                        title={`View ${row.id}`}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -314,8 +314,8 @@ const AssessmentCategoryPage = () => {
                     type="button"
                     onClick={() => setPage(p)}
                     className={`rounded-md border px-3 py-1.5 text-sm transition ${p === page
-                        ? "bg-[#6c2bd9] text-white"
-                        : "bg-white text-gray-700 hover:bg-gray-50"
+                      ? "bg-[#6c2bd9] text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-50"
                       }`}
                     aria-current={p === page ? "page" : undefined}
                   >

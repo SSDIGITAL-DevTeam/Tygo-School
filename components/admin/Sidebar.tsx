@@ -142,10 +142,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </li>
                     <li>
                       <Link
-                        href="/admin/master-data/teachers-management/teacher-list"
+                        href="/admin/master-data/teachers-management"
                         onClick={handleNav}
                         className={`block pl-11 pr-4 py-2 rounded-md ${
-                          starts("/admin/master-data/teachers-management/teacher-list") ? CHILD_ACTIVE : CHILD_BASE
+                          starts("/admin/master-data/teachers-management") ? CHILD_ACTIVE : CHILD_BASE
                         }`}
                       >
                         Teachers

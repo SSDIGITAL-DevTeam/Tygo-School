@@ -26,6 +26,8 @@ import {
   SUBJECT_STATUS_FILTERS,
 } from "./subject-data";
 import AddButton from "@/components/layout-global/AddButton";
+import EditAction from "@/components/layout-global/EditAction";
+import ViewAction from "@/components/layout-global/ViewAction";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -131,6 +133,8 @@ const SubjectManagementPage: React.FC = () => {
     []
   );
 
+    const SUBJECTS_BASE = "/admin/master-data/subjects";
+
   return (
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
       <div className="flex">
@@ -167,9 +171,9 @@ const SubjectManagementPage: React.FC = () => {
                   <h2 className="text-lg font-semibold text-gray-900">
                     Subjects List
                   </h2>
-                  
+
                   <div className="flex justify-end">
-                    <AddButton entity="Subject" href="/admin/master-data/subjects/add-subject" />
+                    <AddButton entity="Subject" href={`${SUBJECTS_BASE}/add-subject`} />
                     {/* Renders: “Add Role” with the purple pill styling */}
                   </div>
                 </div>
@@ -287,27 +291,16 @@ const SubjectManagementPage: React.FC = () => {
                           </td>
                           <td className="px-3 py-3">
                             <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                className="rounded-md p-2 text-[#6c2bd9] transition hover:bg-purple-50"
-                                aria-label={`Edit ${row.name}`}
-                              >
-                                <PenSquare className="h-4 w-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  router.push(
-                                    `/master-data/subjects/subject-detail?code=${encodeURIComponent(
-                                      row.code
-                                    )}`
-                                  )
-                                }
-                                className="rounded-md p-2 text-[#6c2bd9] transition hover:bg-purple-50"
-                                aria-label={`View ${row.name}`}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </button>
+                              <EditAction
+                                href={`${SUBJECTS_BASE}/${encodeURIComponent(row.name)}/edit`}
+                                title={`Edit ${row.name}`}
+                              />
+
+                              {/* Kanan: View -> /admin/master-data/classes/class-detail?name={name} */}
+                              <ViewAction
+                                href={`${SUBJECTS_BASE}/subject-detail?name=${encodeURIComponent(row.name)}`}
+                                title={`View ${row.name}`}
+                              />
                             </div>
                           </td>
                         </tr>
