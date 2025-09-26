@@ -21,10 +21,10 @@ export type AdminRow = {
   name: string;
   email: string;
   role:
-    | "Admin"
-    | "Secondary Admin"
-    | "Subjects and Teachers Admin"
-    | "Students Report Admin";
+  | "Admin"
+  | "Secondary Admin"
+  | "Subjects and Teachers Admin"
+  | "Students Report Admin";
   features: number;
   status: "Active" | "Non Active";
 };
@@ -125,16 +125,17 @@ const AdminTable: React.FC<AdminTableProps> = ({ data }) => {
     <section className="rounded-2xl bg-white p-6 shadow-md ring-1 ring-slate-200">
       {/* Header row: title + Add Admin*/}
       <div className="mb-10 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Role List</h2>
-        <button
-          type="button"
+        <h2 className="text-xl font-semibold text-gray-900">Admin List</h2>
+        <Link
+          href="/role-access/admin-list/add-admin"
           className="inline-flex items-center gap-2 rounded-full bg-violet-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition active:scale-95 hover:bg-violet-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
-          onClick={() => console.log("Add role clicked")}
+          aria-label="Add Admin"
         >
           <Plus className="h-4 w-4" />
-          <span>Add Role</span>
-        </button>
+          <span>Add Admin</span>
+        </Link>
       </div>
+
 
       {/* Toolbar: Filter + Search (kiri) & Download (kanan) */}
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -161,9 +162,8 @@ const AdminTable: React.FC<AdminTableProps> = ({ data }) => {
                       setFilterOpen(false);
                       setPage(1);
                     }}
-                    className={`w-full rounded-md px-3 py-2 text-left text-sm ${
-                      statusFilter === v ? "bg-violet-50 text-violet-700" : "text-slate-600 hover:bg-slate-50"
-                    }`}
+                    className={`w-full rounded-md px-3 py-2 text-left text-sm ${statusFilter === v ? "bg-violet-50 text-violet-700" : "text-slate-600 hover:bg-slate-50"
+                      }`}
                   >
                     {v === "All" ? "All Status" : v}
                   </button>
@@ -276,7 +276,7 @@ const AdminTable: React.FC<AdminTableProps> = ({ data }) => {
       </div>
 
       {/* Footer: komponen Pagination reusable */}
-      <div className="mt-6 border-t border-slate-200 pt-4">
+      <div className="mt-6 pt-4">
         <Pagination
           total={total}
           page={page}
