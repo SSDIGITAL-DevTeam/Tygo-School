@@ -3,62 +3,30 @@ import React, { useMemo, useState } from "react";
 import Sidebar from "../../../../components/admin/Sidebar";
 import Topbar from "../../../../components/layout-global/Topbar";
 import AdminTable, { AdminRow } from "../../../../components/admin/AdminTable";
+import PageHeader from "../../../../components/layout-global/PageHeader";
 import { Inter } from "next/font/google";
 import { Users } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
+// Dummy data admin
 const buildAdmins = (): AdminRow[] => {
   const seed: AdminRow[] = [
     { id: "meijiko", name: "Meijiko", email: "meijiko@gmail.com", role: "Admin", features: 6, status: "Active" },
     { id: "ryan", name: "Ryan Kusuma", email: "ryan@gmail.com", role: "Secondary Admin", features: 4, status: "Active" },
-    {
-      id: "heriyanto",
-      name: "Heriyanto",
-      email: "heriyanto@gmail.com",
-      role: "Subjects and Teachers Admin",
-      features: 4,
-      status: "Active",
-    },
-    {
-      id: "imroatust",
-      name: "Imroatust",
-      email: "imroatust@gmail.com",
-      role: "Students Report Admin",
-      features: 5,
-      status: "Non Active",
-    },
+    { id: "heriyanto", name: "Heriyanto", email: "heriyanto@gmail.com", role: "Subjects and Teachers Admin", features: 4, status: "Active" },
+    { id: "imroatust", name: "Imroatust", email: "imroatust@gmail.com", role: "Students Report Admin", features: 5, status: "Non Active" },
   ];
 
   const extraNames = [
-    "Intan Permata",
-    "Budi Santoso",
-    "Andre Simatupang",
-    "Gita Prameswari",
-    "Larissa Kamila",
-    "Samuel Adrian",
-    "Fauzan Nur",
-    "Aulia Rahman",
-    "Chelsea Debora",
-    "Yoga Mahendra",
-    "Nabila Safitri",
-    "Raka Yudhistira",
-    "Ajeng Maharani",
-    "Pramudya Seno",
-    "Kamal Fariz",
-    "Dewi Lestari",
-    "Putra Nugraha",
-    "Siska Hapsari",
-    "Dimas Prasetya",
-    "Farhan Maulana",
-    "Jacky Fernandez",
+    "Intan Permata","Budi Santoso","Andre Simatupang","Gita Prameswari","Larissa Kamila","Samuel Adrian",
+    "Fauzan Nur","Aulia Rahman","Chelsea Debora","Yoga Mahendra","Nabila Safitri","Raka Yudhistira",
+    "Ajeng Maharani","Pramudya Seno","Kamal Fariz","Dewi Lestari","Putra Nugraha","Siska Hapsari",
+    "Dimas Prasetya","Farhan Maulana","Jacky Fernandez",
   ];
 
   const roles: AdminRow["role"][] = [
-    "Admin",
-    "Secondary Admin",
-    "Subjects and Teachers Admin",
-    "Students Report Admin",
+    "Admin", "Secondary Admin", "Subjects and Teachers Admin", "Students Report Admin",
   ];
 
   const extras: AdminRow[] = extraNames.map((name, index) => {
@@ -82,26 +50,23 @@ const AdminListPage: React.FC = () => {
   const admins = useMemo(buildAdmins, []);
 
   return (
-    <div className={inter.className}>
-      <div className="flex min-h-screen">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <div className="w-64 shrink-0" aria-hidden />
+    <div className={`${inter.className} flex min-h-screen`}>
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="w-64 shrink-0" aria-hidden />
 
-        <main className="flex-1 min-h-screen bg-slate-100">
-          <Topbar offset={false} onToggleSidebar={() => setSidebarOpen((open) => !open)} />
+      <div className="flex min-h-screen flex-1 flex-col bg-slate-100">
+        <Topbar offset={false} onToggleSidebar={() => setSidebarOpen((open) => !open)} />
 
+        <main className="flex-1">
           <div className="space-y-6 p-4 md:p-6 lg:p-8">
-            {/* Header card */}
             <div className="mx-auto max-w-7xl">
-              <div className="flex items-center gap-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                <div className="grid h-10 w-10 place-items-center rounded-full bg-violet-100">
-                  <Users className="h-5 w-5 text-violet-700" aria-hidden />
-                </div>
-                <h1 className="text-2xl font-semibold text-gray-900">Admin List</h1>
-              </div>
+              {/* === Reusable PageHeader === */}
+              <PageHeader
+                title="Admin List"
+                icon={<Users className="h-5 w-5 text-violet-700" aria-hidden />}
+              />
             </div>
 
-            {/* Table section */}
             <div className="mx-auto max-w-7xl">
               <AdminTable data={admins} />
             </div>
