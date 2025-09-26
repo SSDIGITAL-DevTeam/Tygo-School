@@ -1,17 +1,13 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  Filter,
-  Search,
-  Download,
-  Plus,
-  ChevronUp,
-  ChevronDown,
-  Pencil,
-  Eye,
-} from "lucide-react";
+import { Eye, Pencil, ChevronDown, ChevronUp } from "lucide-react";
+
 import Pagination from "@/components/layout-global/Pagination";
+import SearchInput from "@/components/layout-global/SearchInput";
+import StatusFilter, { StatusValue } from "@/components/layout-global/StatusFilter";
+import AddButton from "@/components/layout-global/AddButton";
+import DownloadButton from "@/components/layout-global/DownloadButton";
 
 export type RoleRow = {
   id: string;
@@ -20,29 +16,45 @@ export type RoleRow = {
   status: "Active" | "Non Active";
 };
 
-type SortKey = "name" | "features";
+type SortKey = "name" | "features" | "status";
 type SortDir = "asc" | "desc";
 type Props = { data: RoleRow[] };
 
+// CSV helper
+const exportToCsv = (rows: RoleRow[]) => {
+  const headers = ["Role Name", "Accessible Features", "Status"];
+  const lines = rows.map((r) => [r.name, `${r.features}`, r.status]);
+  const csv = [headers, ...lines]
+    .map((l) => l.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+
+  const d = new Date();
+  const pad = (n: number) => `${n}`.padStart(2, "0");
+  const name = `role-list_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(
+    d.getHours()
+  )}${pad(d.getMinutes())}.csv`;
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
 const RoleTable: React.FC<Props> = ({ data }) => {
+  // state
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Non Active">("All");
+  const [statusFilter, setStatusFilter] = useState<StatusValue>("All");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(4);
-  const [filterOpen, setFilterOpen] = useState(false);
-  const filterRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!filterOpen) return;
-    const handler = (event: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(event.target as Node)) setFilterOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [filterOpen]);
-
+  // pipe
   const filtered = useMemo(() => {
     let rows = [...data];
     if (statusFilter !== "All") rows = rows.filter((row) => row.status === statusFilter);
@@ -51,22 +63,28 @@ const RoleTable: React.FC<Props> = ({ data }) => {
     rows.sort((a, b) => {
       const left: any = a[sortKey];
       const right: any = b[sortKey];
-      const cmp = typeof left === "number"
-        ? left - right
-        : String(left).localeCompare(String(right), undefined, { numeric: true });
+      const cmp =
+        typeof left === "number" && typeof right === "number"
+          ? left - right
+          : String(left).localeCompare(String(right), undefined, { numeric: true });
       return sortDir === "asc" ? cmp : -cmp;
     });
     return rows;
   }, [data, query, sortDir, sortKey, statusFilter]);
 
+  // pagination
   const total = filtered.length;
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const currentPage = Math.min(page, pageCount);
-  const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   useEffect(() => {
     if (page > pageCount) setPage(pageCount);
   }, [page, pageCount]);
+
+  const paged = useMemo(
+    () => filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filtered, currentPage, pageSize]
+  );
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
@@ -76,80 +94,42 @@ const RoleTable: React.FC<Props> = ({ data }) => {
     }
   };
 
-  const changeStatus = (value: "All" | "Active" | "Non Active") => {
-    setStatusFilter(value);
-    setFilterOpen(false);
-    setPage(1);
-  };
-
   return (
     <section className="rounded-2xl bg-white p-6 shadow-md ring-1 ring-slate-200">
+      {/* Header + Add */}
       <div className="mb-10 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">Role List</h2>
-        <Link
-          href="app/admin/role-access/role-management/add-role"
-          className="inline-flex items-center gap-2 rounded-full bg-violet-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition active:scale-95 hover:bg-violet-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
-        >
-          <Plus className="h-4 w-4" aria-hidden />
-          <span>Add Role</span>
-        </Link>
+        <AddButton href="/role-access/role-management/add-role" label="Add Role" ariaLabel="Add Role" />
       </div>
 
-      <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center">
+      {/* Toolbar: Filter + Search + Download */}
+      <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative" ref={filterRef}>
-            <button
-              type="button"
-              aria-haspopup="menu"
-              aria-expanded={filterOpen}
-              onClick={() => setFilterOpen((open) => !open)}
-              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition active:scale-95 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
-            >
-              <Filter className="h-4 w-4 text-slate-500" aria-hidden />
-              <span>Filter</span>
-            </button>
-            {filterOpen && (
-              <div className="absolute z-20 mt-2 w-40 rounded-lg border border-slate-200 bg-white p-2 shadow-lg">
-                {["All", "Active", "Non Active"].map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    onClick={() => changeStatus(status as typeof statusFilter)}
-                    className={`flex w-full items-center rounded-md px-3 py-2 text-sm ${
-                      statusFilter === status ? "bg-violet-50 text-violet-700" : "text-slate-600 hover:bg-slate-50"
-                    }`}
-                  >
-                    {status === "All" ? "All Status" : status}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="relative w-full max-w-md">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
-            <input
-              value={query}
-              onChange={(event) => {
-                setQuery(event.target.value);
-                setPage(1);
-              }}
-              placeholder="Search Here"
-              className="w-full rounded-md border border-slate-300 pl-9 pr-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-300"
-            />
-          </div>
+          <StatusFilter
+            value={statusFilter}
+            onChange={(v) => {
+              setStatusFilter(v);
+              setPage(1);
+            }}
+            // options default: ["All", "Active", "Non Active"]
+          />
+          <SearchInput
+            value={query}
+            onChange={(val) => {
+              setQuery(val);
+              setPage(1);
+            }}
+            placeholder="Search Here"
+          />
         </div>
 
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm transition active:scale-95 hover:bg-slate-50"
-          onClick={() => console.log("Download roles")}
-        >
-          <Download className="h-4 w-4" aria-hidden />
-          <span>Download Data</span>
-        </button>
+        <DownloadButton
+          label="Download Data"
+          onClick={() => exportToCsv(filtered)}
+        />
       </div>
 
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full table-auto text-sm text-slate-800">
           <thead>
@@ -173,17 +153,22 @@ const RoleTable: React.FC<Props> = ({ data }) => {
                       className="inline-flex items-center gap-1"
                     >
                       {col.label}
-                      {sortKey === (col.key as SortKey)
-                        ? sortDir === "asc"
-                          ? <ChevronUp className="h-4 w-4" aria-hidden />
-                          : <ChevronDown className="h-4 w-4" aria-hidden />
-                        : <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden />}
+                      {sortKey === (col.key as SortKey) ? (
+                        sortDir === "asc" ? (
+                          <ChevronUp className="h-4 w-4" aria-hidden />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" aria-hidden />
+                        )
+                      ) : (
+                        <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden />
+                      )}
                     </button>
                   )}
                 </th>
               ))}
             </tr>
           </thead>
+
           <tbody>
             {paged.map((row) => (
               <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50">
@@ -210,7 +195,7 @@ const RoleTable: React.FC<Props> = ({ data }) => {
                       <Pencil className="h-4 w-4" aria-hidden />
                     </Link>
                     <Link
-                      href={`app/admin/role-access/role-management/add-role/${encodeURIComponent(row.id)}`}
+                      href={`/role-access/role-management/detail/${encodeURIComponent(row.id)}`}
                       aria-label={`View role ${row.name}`}
                       className="rounded-md p-1 text-violet-700 transition hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
                     >
@@ -224,6 +209,7 @@ const RoleTable: React.FC<Props> = ({ data }) => {
         </table>
       </div>
 
+      {/* Pagination */}
       <div className="mt-6">
         <Pagination
           total={total}
