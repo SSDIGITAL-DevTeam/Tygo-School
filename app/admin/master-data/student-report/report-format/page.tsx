@@ -1,4 +1,4 @@
-﻿﻿"use client";
+﻿﻿﻿﻿﻿﻿"use client";
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -136,19 +136,17 @@ const ReportFormatPage = () => {
         {filteredReports.map((format) => (
           <div
             key={format.id}
-            className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
+            onClick={() => router.push(`/admin/master-data/student-report/report-format/${encodeURIComponent(format.id)}/edit`)}
+            className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md cursor-pointer sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="flex flex-1 items-start gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f3e8ff] text-[#6c2bd9]">
                 <ClipboardList className="h-6 w-6" />
               </div>
               <div>
-                <button
-                  type="button"
-                  className="text-left text-base font-semibold text-[#5b21b6] transition hover:underline"
-                >
+                <div className="text-left text-base font-semibold text-[#5b21b6] transition hover:underline">
                   {format.title}
-                </button>
+                </div>
                 <p className="mt-1 text-sm text-gray-500">
                   Created at : {format.createdAt}
                 </p>
