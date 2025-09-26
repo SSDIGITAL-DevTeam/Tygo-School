@@ -99,7 +99,7 @@ const RoleTable: React.FC<Props> = ({ data }) => {
       {/* Header + Add */}
       <div className="mb-10 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">Role List</h2>
-        <AddButton href="/role-access/role-management/add-role" label="Add Role" ariaLabel="Add Role" />
+        <AddButton href="admin/role-access/role-management/add-role" label="Add Role" ariaLabel="Add Role" />
       </div>
 
       {/* Toolbar: Filter + Search + Download */}
