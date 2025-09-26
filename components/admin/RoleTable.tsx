@@ -13,7 +13,13 @@ import {
 } from "lucide-react";
 import Pagination from "@/components/layout-global/Pagination";
 
-type RoleRow = { name: string; features: number; status: "Active" | "Non Active" };
+export type RoleRow = {
+  id: string;
+  name: string;
+  features: number;
+  status: "Active" | "Non Active";
+};
+
 type SortKey = "name" | "features";
 type SortDir = "asc" | "desc";
 type Props = { data: RoleRow[] };
@@ -51,7 +57,7 @@ const RoleTable: React.FC<Props> = ({ data }) => {
       return sortDir === "asc" ? cmp : -cmp;
     });
     return rows;
-  }, [data, query, sortKey, sortDir, statusFilter]);
+  }, [data, query, sortDir, sortKey, statusFilter]);
 
   const total = filtered.length;
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
@@ -81,7 +87,7 @@ const RoleTable: React.FC<Props> = ({ data }) => {
       <div className="mb-10 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">Role List</h2>
         <Link
-          href="/role-access/role-management/add"
+          href="app/admin/role-access/role-management/add-role"
           className="inline-flex items-center gap-2 rounded-full bg-violet-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition active:scale-95 hover:bg-violet-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
         >
           <Plus className="h-4 w-4" aria-hidden />
@@ -179,8 +185,8 @@ const RoleTable: React.FC<Props> = ({ data }) => {
             </tr>
           </thead>
           <tbody>
-            {paged.map((row, idx) => (
-              <tr key={`${row.name}-${idx}`} className="border-b border-slate-100 hover:bg-slate-50">
+            {paged.map((row) => (
+              <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50">
                 <td className="px-3 py-3">{row.name}</td>
                 <td className="px-3 py-3">{row.features} Features</td>
                 <td className="px-3 py-3">
@@ -196,18 +202,20 @@ const RoleTable: React.FC<Props> = ({ data }) => {
                 </td>
                 <td className="px-3 py-3 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <button
-                      type="button"
+                    <Link
+                      href={`/role-access/role-management/edit/${encodeURIComponent(row.id)}`}
+                      aria-label={`Edit role ${row.name}`}
                       className="rounded-md p-1 text-violet-700 transition hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
                     >
                       <Pencil className="h-4 w-4" aria-hidden />
-                    </button>
-                    <button
-                      type="button"
+                    </Link>
+                    <Link
+                      href={`app/admin/role-access/role-management/add-role/${encodeURIComponent(row.id)}`}
+                      aria-label={`View role ${row.name}`}
                       className="rounded-md p-1 text-violet-700 transition hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
                     >
                       <Eye className="h-4 w-4" aria-hidden />
-                    </button>
+                    </Link>
                   </div>
                 </td>
               </tr>
