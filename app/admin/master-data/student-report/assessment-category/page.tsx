@@ -1,4 +1,4 @@
-﻿﻿"use client";
+﻿﻿﻿﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,10 @@ import {
   Plus,
   Search,
 } from "lucide-react";
+import AddButton from "@/components/layout-global/AddButton";
+import EditAction from "@/components/layout-global/EditAction";
+import ViewAction from "@/components/layout-global/ViewAction";
+import DownloadButton from "@/components/layout-global/DownloadButton";
 
 type StatusFilter = "All" | "Active" | "Non Active";
 
@@ -122,6 +126,8 @@ const AssessmentCategoryPage = () => {
     return Array.from({ length: end - start + 1 }, (_, index) => start + index);
   }, [page, pageCount]);
 
+  const REPORT_BASE = "/admin/master-data/student-report/assessment-category";
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -131,14 +137,11 @@ const AssessmentCategoryPage = () => {
           </h2>
         </div>
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-          <button
-            type="button"
-            onClick={() => router.push("/master-data/student-report/assessment-category/add-category")}
-            className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#581c87]"
-          >
-            <Plus className="h-4 w-4" />
-            Add New Category
-          </button>
+
+          <div className="flex justify-end">
+            <AddButton entity="New Category" href="/admin/master-data/student-report/assessment-category/add-category" />
+            {/* Renders: “Add Role” with the purple pill styling */}
+          </div>
         </div>
       </header>
 
@@ -165,11 +168,10 @@ const AssessmentCategoryPage = () => {
                         setCategoryStatus(option);
                         setCategoryFilterOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left transition ${
-                        categoryStatus === option
-                          ? "bg-[#f3e8ff] text-[#6c2bd9]"
-                          : "text-gray-600 hover:bg-gray-50"
-                      }`}
+                      className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left transition ${categoryStatus === option
+                        ? "bg-[#f3e8ff] text-[#6c2bd9]"
+                        : "text-gray-600 hover:bg-gray-50"
+                        }`}
                     >
                       <span>{option}</span>
                       {categoryStatus === option && (
@@ -196,13 +198,7 @@ const AssessmentCategoryPage = () => {
           </label>
         </div>
 
-        <button
-          type="button"
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-[#6c2bd9] transition hover:bg-white"
-        >
-          <Download className="h-4 w-4" />
-          Download Data
-        </button>
+        <DownloadButton label="Download Data" />
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
@@ -242,20 +238,16 @@ const AssessmentCategoryPage = () => {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        className="rounded-md p-2 text-[#6c2bd9] transition hover:bg-purple-50"
-                        aria-label={`Edit ${row.name}`}
-                      >
-                        <PenSquare className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded-md p-2 text-[#6c2bd9] transition hover:bg-purple-50"
-                        aria-label={`View ${row.name}`}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
+                      <EditAction
+                        href={`${REPORT_BASE}/${encodeURIComponent(row.id)}/edit`}
+                        title={`Edit ${row.id}`}
+                      />
+
+                      {/* View -> detail-category page */}
+                      <ViewAction
+                        href={`${REPORT_BASE}/detail-category?id=${encodeURIComponent(row.id)}`}
+                        title={`View ${row.name}`}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -316,11 +308,10 @@ const AssessmentCategoryPage = () => {
                     key={p}
                     type="button"
                     onClick={() => setPage(p)}
-                    className={`rounded-md border px-3 py-1.5 text-sm transition ${
-                      p === page
-                        ? "bg-[#6c2bd9] text-white"
-                        : "bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
+                    className={`rounded-md border px-3 py-1.5 text-sm transition ${p === page
+                      ? "bg-[#6c2bd9] text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-50"
+                      }`}
                     aria-current={p === page ? "page" : undefined}
                   >
                     {p}

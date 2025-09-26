@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Sidebar from "../../../../../components/admin/Sidebar";
 import Header from "../../../../../components/layout-global/Header";
-import ConfirmModal from "../../../../../components/modal/AddTeacherModal";
+import ConfirmModal from "../../../../../components/admin/modal/AddTeacherModal";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import {
@@ -14,6 +14,8 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import AddModal from "@/components/admin/modal/AddModal";
+import SaveButton from "@/components/layout-global/SaveButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -54,6 +56,7 @@ const AddTeacherPage: React.FC = () => {
   );
 
   const router = useRouter();
+  const [addOpen, setAddOpen] = useState(false);
 
   const resetForm = () => {
     setTeacherId("");
@@ -294,13 +297,9 @@ const AddTeacherPage: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]">
                       <div className="hidden md:block" />
                       <div className="mt-2 flex justify-end">
-                        <button
-                          type="submit"
-                          className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-[#5922b8]"
-                        >
-                          <Save className="h-4 w-4" />
-                          Save Data
-                        </button>
+                        <SaveButton 
+                          onClick={() => setAddOpen(true)}
+                        />
                       </div>
                     </div>
 
@@ -318,15 +317,13 @@ const AddTeacherPage: React.FC = () => {
         </div>
       </div>
 
-      <ConfirmModal
-        open={modalOpen}
-        title="Add Teacher?"
-        description="Are you sure want to add this teacher?"
-        icon={<BookOpen className="h-5 w-5" />}
-        confirmLabel="Yes, Save"
-        cancelLabel="No"
-        onCancel={() => setModalOpen(false)}
-        onConfirm={handleConfirm}
+      <AddModal
+        open={addOpen}
+        msg="subject"
+        onConfirm={() => {
+          setAddOpen(false);
+        }}
+        onClose={() => setAddOpen(false)}
       />
     </div>
   );

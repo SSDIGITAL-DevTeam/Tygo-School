@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../../../../components/admin/Sidebar";
 import Header from "../../../../../components/layout-global/Header";
+import AddModal from "../../../../../components/admin/modal/AddModal";
 import { ArrowLeft, GraduationCap, Plus, Save, Trash2 } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -40,6 +41,7 @@ const AddClassesPage: React.FC = () => {
   const [classCapacity, setClassCapacity] = useState("");
   const [subjectSelections, setSubjectSelections] = useState<string[]>([""]);
   const [reportSelections, setReportSelections] = useState<string[]>([""]);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   const router = useRouter();
 
@@ -48,6 +50,11 @@ const AddClassesPage: React.FC = () => {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // Show the AddModal instead of direct submission
+    setAddModalOpen(true);
+  };
+
+  const handleConfirmAdd = () => {
     // Form submit handling will be implemented later.
     console.log("Submitting add class form", {
       className,
@@ -56,6 +63,14 @@ const AddClassesPage: React.FC = () => {
       subjects: subjectSelections,
       reports: reportSelections,
     });
+    
+    // Close modal and navigate back to classes page
+    setAddModalOpen(false);
+    router.push("/admin/master-data/classes");
+  };
+
+  const handleCloseModal = () => {
+    setAddModalOpen(false);
   };
 
   const addSubjectSelect = () => {
@@ -346,6 +361,14 @@ const AddClassesPage: React.FC = () => {
           </main>
         </div>
       </div>
+
+      {/* Add Modal */}
+      <AddModal
+        open={addModalOpen}
+        msg="Class"
+        onConfirm={handleConfirmAdd}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };

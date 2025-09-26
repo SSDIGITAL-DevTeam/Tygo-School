@@ -1,19 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Inter } from "next/font/google";
 import { useRouter, useSearchParams } from "next/navigation";
 import Sidebar from "../../../../../components/admin/Sidebar";
 import Header from "../../../../../components/layout-global/Header";
 import StatusBadge from "../../../../../components/layout-global/StatusBadge";
-import { ArrowLeft, BookOpen, PenSquare, Trash2 } from "lucide-react";
+import { ArrowLeft, BookOpen } from "lucide-react";
 import { getSubjectList } from "../subject-data";
+import DeleteButton from "@/components/layout-global/DeleteButton";
+import EditButton from "@/components/layout-global/EditButton";
+import DeleteModal from "@/components/admin/modal/DeleteModal"; // <-- sesuaikan bila perlu
 
 const inter = Inter({ subsets: ["latin"] });
 
 const SubjectDetailPage: React.FC = () => {
   const router = useRouter();
   const params = useSearchParams();
+
+  const [openDelete, setOpenDelete] = useState(false);
 
   const subjectCode = params.get("code");
   const subjects = getSubjectList();
@@ -23,11 +28,7 @@ const SubjectDetailPage: React.FC = () => {
   return (
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
       <div className="flex">
-        <Sidebar
-          isOpen={false}
-          onClose={() => undefined}
-          active="Master Data"
-        />
+        <Sidebar isOpen={false} onClose={() => undefined} />
 
         <div className="flex min-h-screen flex-1 flex-col">
           <Header onToggleSidebar={() => undefined} />
@@ -38,9 +39,7 @@ const SubjectDetailPage: React.FC = () => {
               <span className="mx-2">/</span>
               <span className="text-gray-500">Manage Subjects</span>
               <span className="mx-2">/</span>
-              <span className="font-semibold text-gray-700">
-                Subject Detail
-              </span>
+              <span className="font-semibold text-gray-700">Subject Detail</span>
             </nav>
 
             <section className="rounded-2xl border border-gray-200 bg-white shadow-sm">
@@ -62,9 +61,7 @@ const SubjectDetailPage: React.FC = () => {
                       <h1 className="text-xl font-semibold text-gray-900">
                         Subject Detail
                       </h1>
-                      <p className="text-sm text-gray-500">
-                        {subject?.name ?? ""}
-                      </p>
+                      <p className="text-sm text-gray-500">{subject?.name ?? ""}</p>
                     </div>
                   </div>
                 </div>
@@ -78,7 +75,6 @@ const SubjectDetailPage: React.FC = () => {
                 <div className="rounded-md border-2 border-[#3b82f6]">
                   <table className="min-w-full text-sm">
                     <tbody>
-                      {/* Header row (judul kolom) */}
                       <tr className="border-b border-blue-300 border-dotted">
                         <th className="w-1/2 bg-[#f8f8ff] px-6 py-3 text-left font-semibold text-[#5b21b6]">
                           Subject Code
@@ -88,7 +84,6 @@ const SubjectDetailPage: React.FC = () => {
                         </th>
                       </tr>
 
-                      {/* Value row */}
                       <tr className="border-b border-blue-300 border-dotted">
                         <td className="px-6 py-3 text-gray-800">
                           {subject?.code ?? "-"}
@@ -98,49 +93,58 @@ const SubjectDetailPage: React.FC = () => {
                         </td>
                       </tr>
 
-                      {/* Description row (span sisa kolom) */}
                       <tr className="border-b border-blue-300 border-dotted last:border-b-0">
                         <th className="bg-[#f8f8ff] px-6 py-3 text-left font-semibold text-[#5b21b6] align-top">
                           Description
                         </th>
-                        <th className="bg-[#f8f8ff] px-6 py-3 text-left font-semibold text-[#5b21b6] align-top">
-                          
-                        </th>
+                        <th className="bg-[#f8f8ff] px-6 py-3 text-left font-semibold text-[#5b21b6] align-top"></th>
                       </tr>
 
                       <tr className="border-b border-blue-300 border-dotted last:border-b-0">
                         <td className="px-6 py-3 text-gray-800 border-l border-gray-200">
                           {subject?.description ?? "-"}
                         </td>
-                        <td className="px-6 py-3 text-gray-600" colSpan={1}>
-                          
-                        </td>
+                        <td className="px-6 py-3 text-gray-600" colSpan={1}></td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-2 rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-200"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete Data
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-2 rounded-full bg-yellow-100 px-4 py-2 text-sm font-semibold text-yellow-700 transition hover:bg-yellow-200"
-                  >
-                    <PenSquare className="h-4 w-4" />
-                    Edit Data
-                  </button>
+                {/* Actions: rata kanan */}
+                <div className="flex flex-wrap justify-end gap-6">
+                  <DeleteButton
+                    onClick={() => setOpenDelete(true)}
+                    label="Delete Data"
+                  />
+                  <EditButton
+                    onClick={() =>
+                      router.push(
+                        `/admin/master-data/subjects/subject-detail/${encodeURIComponent(
+                          subject?.code ?? ""
+                        )}/edit`
+                      )
+                    }
+                    label="Edit Data"
+                  />
                 </div>
               </div>
             </section>
           </main>
         </div>
       </div>
+
+      {/* Modal Delete */}
+      <DeleteModal
+        open={openDelete}
+        name={subject?.name ?? subject?.code ?? "this subject"}
+        msg="subject"
+        onConfirm={() => {
+          setOpenDelete(false);
+          // lakukan aksi delete di sini jika sudah ada API/storage
+          router.back(); // kembali ke halaman sebelumnya setelah delete
+        }}
+        onClose={() => setOpenDelete(false)}
+      />
     </div>
   );
 };

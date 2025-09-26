@@ -10,6 +10,7 @@ import {
   Plus,
   Search,
 } from "lucide-react";
+import AddButton from "@/components/layout-global/AddButton";
 
 type StatusFilter = "All" | "Active" | "Non Active";
 
@@ -63,7 +64,7 @@ const ReportFormatPage = () => {
 
   return (
     <div className="space-y-6">
-      
+
       <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Report Format List</h2>
@@ -78,14 +79,11 @@ const ReportFormatPage = () => {
             Sort
             <ChevronDown className="h-4 w-4" />
           </button>
-          <button
-            type="button"
-            onClick={() => router.push("/master-data/student-report/report-format/add-format")}
-            className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#581c87]"
-          >
-            <Plus className="h-4 w-4" />
-            Add Report Format
-          </button>
+
+          <div className="flex justify-end">
+            <AddButton entity="Report Format" href="/admin/master-data/student-report/report-format/add-format" />
+            {/* Renders: “Add Role” with the purple pill styling */}
+          </div>
         </div>
       </header>
 
@@ -116,11 +114,10 @@ const ReportFormatPage = () => {
                         setReportStatus(option);
                         setReportFilterOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left transition ${
-                        reportStatus === option
+                      className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left transition ${reportStatus === option
                           ? "bg-[#f3e8ff] text-[#6c2bd9]"
                           : "text-gray-600 hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       <span>{option}</span>
                       {reportStatus === option && (

@@ -1,32 +1,34 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import Sidebar from "../../../../../components/admin/Sidebar";
-import Header from "../../../../../components/layout-global/Header";
-import Pagination from "../../../../../components/layout-global/Pagination";
-import StatusBadge from "../../../../../components/layout-global/StatusBadge";
 import { Inter } from "next/font/google";
-import { useRouter } from "next/navigation";
+
+// Pakai alias agar stabil (pastikan tsconfig paths '@/*' sudah ada)
+import Sidebar from "@/components/admin/Sidebar";
+import Header from "@/components/layout-global/Header";
+import Pagination from "@/components/layout-global/Pagination";
+import StatusBadge from "@/components/layout-global/StatusBadge";
+import AddButton from "@/components/layout-global/AddButton";
+import EditAction from "@/components/layout-global/EditAction";
+import ViewAction from "@/components/layout-global/ViewAction";
+
 import {
   ArrowUpDown,
   ChevronDown,
   ChevronUp,
   Download,
-  Eye,
   Filter,
   GraduationCap,
-  PenSquare,
-  Plus,
   Search,
   X,
 } from "lucide-react";
-import { getTeacherList, TeacherRecord } from "../teacher-data";
+
+import { getTeacherList, TeacherRecord } from "./teacher-data";
+import DownloadButton from "@/components/layout-global/DownloadButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
 type TeacherRow = TeacherRecord;
-
-const TEACHER_LIST_PATH = "/master-data/teachers-management/teacher-detail";
 
 const columns: Array<{ key: keyof TeacherRow | "action"; label: string }> = [
   { key: "id", label: "Teacher ID" },
@@ -37,6 +39,9 @@ const columns: Array<{ key: keyof TeacherRow | "action"; label: string }> = [
   { key: "status", label: "Status" },
   { key: "action", label: "Action" },
 ];
+
+const TEACHER_BASE =
+  "/admin/master-data/teachers-management/teacher-detail";
 
 const TeacherManagementPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -60,12 +65,9 @@ const TeacherManagementPage: React.FC = () => {
 
   const filteredTeachers = useMemo(() => {
     return teachers.filter((row) => {
-      if (statusFilter !== "All" && row.status !== statusFilter) {
-        return false;
-      }
-      if (!normalizedQuery) {
-        return true;
-      }
+      if (statusFilter !== "All" && row.status !== statusFilter) return false;
+      if (!normalizedQuery) return true;
+
       const haystack = [
         row.id,
         row.fullName,
@@ -76,6 +78,7 @@ const TeacherManagementPage: React.FC = () => {
       ]
         .join(" ")
         .toLowerCase();
+
       return haystack.includes(normalizedQuery);
     });
   }, [teachers, normalizedQuery, statusFilter]);
@@ -85,6 +88,7 @@ const TeacherManagementPage: React.FC = () => {
     const key = sort.key;
     const dir = sort.direction;
     const numeric = key === "id";
+
     copy.sort((a, b) => {
       let va: string | number = "";
       let vb: string | number = "";
@@ -114,20 +118,18 @@ const TeacherManagementPage: React.FC = () => {
       });
       return dir === "asc" ? comparison : -comparison;
     });
+
     return copy;
   }, [filteredTeachers, sort]);
 
   const pageCount = Math.max(1, Math.ceil(sortedTeachers.length / pageSize));
 
   useEffect(() => {
-    if (page > pageCount) {
-      setPage(pageCount);
-    }
+    if (page > pageCount) setPage(pageCount);
   }, [page, pageCount]);
 
   const startIndex = (page - 1) * pageSize;
   const visibleRows = sortedTeachers.slice(startIndex, startIndex + pageSize);
-  const showingCount = visibleRows.length;
   const totalCount = sortedTeachers.length;
 
   const handleSort = (key: keyof TeacherRow) => {
@@ -147,117 +149,99 @@ const TeacherManagementPage: React.FC = () => {
   };
 
   const handleDownload = useCallback(() => {
-    if (!sortedTeachers.length) {
-      return;
-    }
+    if (!sortedTeachers.length) return;
 
     const header = columns
-      .filter((column) => column.key !== "action")
-      .map((column) => column.label);
+      .filter((c) => c.key !== "action")
+      .map((c) => c.label);
 
     const rows = sortedTeachers.map((row) => [
       row.id,
       row.fullName,
       row.email,
-      row.subjects.join('; '),
-      row.homeroomClass ?? '',
+      row.subjects.join("; "),
+      row.homeroomClass ?? "",
       row.status,
     ]);
 
-    const escapeCell = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const escapeCell = (v: string) => `"${v.replace(/"/g, '""')}"`;
     const csv = [header, ...rows]
-      .map((line) => line.map((cell) => escapeCell(String(cell))).join(','))
-      .join('\r\n');
+      .map((line) => line.map((cell) => escapeCell(String(cell))).join(","))
+      .join("\r\n");
 
-    const blob = new Blob(['﻿' + csv], {
-      type: 'text/csv;charset=utf-8;',
-    });
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute(
-      'download',
+    const a = document.createElement("a");
+    a.href = url;
+    a.setAttribute(
+      "download",
       `teacher-data-${new Date().toISOString().slice(0, 10)}.csv`
     );
-    document.body.append(link);
-    link.click();
-    document.body.removeChild(link);
+    document.body.append(a);
+    a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [sortedTeachers]);
-
-  const router = useRouter();
 
   return (
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
       <div className="flex">
-        <Sidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <div className="flex-1 min-h-screen flex flex-col">
-          <Header onToggleSidebar={() => setSidebarOpen((value) => !value)} />
+          <Header onToggleSidebar={() => setSidebarOpen((v) => !v)} />
 
           <main className="relative z-0 ml-64 p-4 md:p-6 lg:p-8">
-            <nav aria-label="Breadcrumb" className="text-sm text-gray-600 mb-4">
+            <nav aria-label="Breadcrumb" className="mb-4 text-sm text-gray-600">
               <ol className="flex items-center gap-2">
                 <li>Master Data</li>
-                <li aria-hidden className="text-gray-400">
-                  /
-                </li>
-                <li className="text-gray-900 font-medium">Manage Teachers</li>
+                <li aria-hidden className="text-gray-400">/</li>
+                <li className="font-medium text-gray-900">Manage Teachers</li>
               </ol>
             </nav>
 
-            <section className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <section className="mb-6 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#6c2bd9] to-[#8b5cf6] text-white flex items-center justify-center shadow-md">
-                  <GraduationCap className="w-7 h-7" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6c2bd9] to-[#8b5cf6] text-white shadow-md">
+                  <GraduationCap className="h-7 w-7" />
                 </div>
-                <div>
-                  <h1 className="text-xl font-semibold text-gray-900">
-                    Manage Teachers
-                  </h1>
-                </div>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  Manage Teachers
+                </h1>
               </div>
             </section>
 
-            <section className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-200 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    Teachers List
-                  </h2>
-                </div>
+            <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <div className="flex flex-col gap-4 border-b border-gray-200 p-6 lg:flex-row lg:items-start lg:justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Teachers List
+                </h2>
+
                 <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => router.push("/master-data/teachers-management/add-teacher")}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#581c87]"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Teacher
-                  </button>
+                  <AddButton
+                    entity="Teacher"
+                    href="/admin/master-data/teachers-management/add-teacher"
+                  />
                 </div>
               </div>
 
-              <div className="p-6 space-y-4">
+              <div className="space-y-4 p-6">
                 <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-                  {/* LEFT GROUP: Filter + Search */}
-                  <div className="flex items-center gap-3 w-full xl:w-auto">
+                  {/* LEFT: Filter + Search */}
+                  <div className="flex w-full items-center gap-3 xl:w-auto">
                     {/* Filter */}
                     <div className="relative">
                       <button
                         type="button"
-                        onClick={() => setShowFilter((open) => !open)}
+                        onClick={() => setShowFilter((o) => !o)}
                         className={`inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
                           showFilter || statusFilter !== "All"
-                            ? "border-[#6c2bd9] text-[#6c2bd9] bg-purple-50"
+                            ? "border-[#6c2bd9] bg-purple-50 text-[#6c2bd9]"
                             : "border-gray-300 text-gray-700 hover:bg-gray-50"
                         }`}
                         aria-expanded={showFilter}
                       >
-                        <Filter className="w-4 h-4" />
+                        <Filter className="h-4 w-4" />
                         Filter
                         {statusFilter !== "All" && (
                           <span className="ml-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[#6c2bd9] px-1 text-xs font-semibold text-white">
@@ -276,7 +260,7 @@ const TeacherManagementPage: React.FC = () => {
                               className="rounded-md p-1 text-gray-500 hover:bg-gray-100"
                               onClick={() => setShowFilter(false)}
                             >
-                              <X className="w-3.5 h-3.5" />
+                              <X className="h-3.5 w-3.5" />
                             </button>
                           </div>
                           <ul className="space-y-1 text-sm text-gray-600">
@@ -291,7 +275,7 @@ const TeacherManagementPage: React.FC = () => {
                                   }
                                   className={`w-full rounded-md px-3 py-2 text-left transition-colors ${
                                     statusFilter === option
-                                      ? "bg-purple-100 text-[#6c2bd9] font-semibold"
+                                      ? "bg-purple-100 font-semibold text-[#6c2bd9]"
                                       : "hover:bg-gray-100"
                                   }`}
                                 >
@@ -310,8 +294,8 @@ const TeacherManagementPage: React.FC = () => {
                       <input
                         type="search"
                         value={query}
-                        onChange={(event) => {
-                          setQuery(event.target.value);
+                        onChange={(e) => {
+                          setQuery(e.target.value);
                           setPage(1);
                         }}
                         placeholder="Search Here"
@@ -320,15 +304,8 @@ const TeacherManagementPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* RIGHT: Download Button */}
-                  <button
-                    type="button"
-                    onClick={handleDownload}
-                    className="inline-flex items-center gap-2 rounded-full border border-gray-300 px-5 py-2 text-sm font-semibold text-[#6c2bd9] transition-colors hover:border-[#6c2bd9]/60 hover:text-[#581c87]"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download Data
-                  </button>
+                  {/* RIGHT: Download */}
+                  <DownloadButton label="Download Data" />
                 </div>
 
                 <div className="overflow-x-auto">
@@ -338,7 +315,7 @@ const TeacherManagementPage: React.FC = () => {
                         {columns.map((column) => (
                           <th
                             key={column.key}
-                            className="px-3 py-2 text-left font-semibold select-none"
+                            className="select-none px-3 py-2 text-left font-semibold"
                           >
                             {column.key === "action" ? (
                               <span>{column.label}</span>
@@ -391,30 +368,16 @@ const TeacherManagementPage: React.FC = () => {
                           </td>
                           <td className="px-3 py-3">
                             <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  router.push(`${TEACHER_LIST_PATH}/${row.id}/edit`)
-                                }
-                                className="rounded-md p-2 text-[#6c2bd9] transition-colors hover:bg-purple-50"
-                                aria-label={`Edit ${row.fullName}`}
-                              >
-                                <PenSquare className="h-4 w-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  router.push(`${TEACHER_LIST_PATH}/${row.id}`)
-                                }
-                                className="rounded-md p-2 text-[#6c2bd9] transition-colors hover:bg-purple-50"
-                                aria-label={`View ${row.fullName}`}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </button>
+                              {/* Edit -> /teacher-detail/{id}/edit */}
+                              <EditAction base={TEACHER_BASE} id={row.id} />
+
+                              {/* View -> /teacher-detail/{id} */}
+                              <ViewAction base={TEACHER_BASE} id={row.id} />
                             </div>
                           </td>
                         </tr>
                       ))}
+
                       {visibleRows.length === 0 && (
                         <tr>
                           <td
@@ -430,12 +393,12 @@ const TeacherManagementPage: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="text-sm text-gray-700 flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
                     <span>Showing</span>
                     <select
                       value={pageSize}
-                      onChange={(event) => {
-                        setPageSize(Number(event.target.value));
+                      onChange={(e) => {
+                        setPageSize(Number(e.target.value));
                         setPage(1);
                       }}
                       className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/40"

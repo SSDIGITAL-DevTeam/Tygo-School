@@ -13,11 +13,11 @@ const inter = Inter({ subsets: ["latin"] });
 const tabs = [
   {
     label: "Assessment Category",
-    href: "/master-data/student-report/assessment-category",
+    href: "/admin/master-data/student-report/assessment-category",
   },
   {
     label: "Report Format",
-    href: "/master-data/student-report/report-format",
+    href: "/admin/master-data/student-report/report-format",
   },
 ] as const;
 
