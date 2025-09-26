@@ -1,4 +1,4 @@
-﻿﻿﻿﻿"use client";
+﻿﻿﻿﻿﻿﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -239,8 +239,8 @@ const AssessmentCategoryPage = () => {
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-2">
                       <EditAction
-                        href={`${REPORT_BASE}/${encodeURIComponent(row.id)}/edit`}
-                        title={`Edit ${row.id}`}
+                        href={`${REPORT_BASE}/detail-category/${encodeURIComponent(row.id)}/edit`}
+                        title={`Edit ${row.name}`}
                       />
 
                       {/* View -> detail-category page */}

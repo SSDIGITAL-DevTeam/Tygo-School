@@ -128,7 +128,7 @@ export default function AssessmentCategoryDetailPage() {
               <EditButton
                 onClick={() =>
                   router.push(
-                    `/admin/master-data/student-report/assessment-category/${category.id}/edit`
+                    `/admin/master-data/student-report/assessment-category/detail-category/${category.id}/edit`
                   )
                 }
 
