@@ -1,4 +1,4 @@
-﻿﻿﻿﻿"use client";
+﻿﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -275,7 +275,7 @@ const AssessmentCategoryPage = () => {
                   }}
                   className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/30"
                 >
-                  {[5, 10, 25].map((option) => (
+                  {[4, 10, 25].map((option) => (
                     <option key={option} value={option}>
                       {option}
                     </option>
@@ -284,11 +284,13 @@ const AssessmentCategoryPage = () => {
                 <span>from {totalCount} data</span>
               </div>
 
-              <Pagination
-                page={page}
-                pageCount={pageCount}
-                onPageChange={setPage}
-              />
+              <div className="flex items-center gap-3">
+                <Pagination
+                  page={page}
+                  pageCount={pageCount}
+                  onPageChange={setPage}
+                />
+              </div>
             </div>
           </div>
         </div>

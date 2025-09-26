@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Inter } from "next/font/google";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Sidebar from "../../../../../components/admin/Sidebar";
 import Header from "../../../../../components/layout-global/Header";
 import StatusBadge from "../../../../../components/layout-global/StatusBadge";
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import Pagination from "../../../../../components/layout-global/Pagination";
 import { getClassDetailByName, StudentFlagColor } from "../class-data";
-import DeleteModal from "@/components/admin/modal/DeleteModal"; // <-- sesuaikan path bila perlu
+import DeleteModal from "@/components/admin/modal/DeleteModal";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,9 +31,12 @@ const flagColorMap: Record<StudentFlagColor, string> = {
   green: "text-green-500",
 };
 
-const ClassDetailPage: React.FC = () => {
+export default function ClassDetailClient({
+  classNameParam,
+}: {
+  classNameParam?: string;
+}) {
   const router = useRouter();
-  const params = useSearchParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>("Subjects");
   const [reportQuery, setReportQuery] = useState("");
@@ -43,24 +46,62 @@ const ClassDetailPage: React.FC = () => {
   const [studentQuery, setStudentQuery] = useState("");
   const [studentPageSize, setStudentPageSize] = useState(4);
   const [studentPage, setStudentPage] = useState(1);
-
-  // Modal delete
   const [openDelete, setOpenDelete] = useState(false);
 
-  const classNameParam = params.get("name");
-  const classDetail = useMemo(
-    () => getClassDetailByName(classNameParam),
-    [classNameParam],
-  );
+  // Ambil data berdasarkan query name yang diteruskan dari server
+  const classDetail = useMemo(() => {
+    if (!classNameParam) return null;
+    return getClassDetailByName(classNameParam);
+  }, [classNameParam]);
+
+  // Guard: jika query ?name tidak ada atau tidak ditemukan
+  if (!classNameParam) {
+    return (
+      <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
+        <div className="p-6">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-2 text-[#6c2bd9] font-semibold"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
+          <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800">
+            Missing query parameter <code>?name</code>.
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (!classDetail) {
+    return (
+      <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
+        <div className="p-6">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-2 text-[#6c2bd9] font-semibold"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
+          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
+            Class "<strong>{classNameParam}</strong>" not found.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const capacityLabel =
-    classDetail.capacity === null ? "Undefined" : classDetail.capacity.toString();
+    classDetail.capacity === null ? "Undefined" : String(classDetail.capacity);
 
   const filteredReports = useMemo(() => {
     const normalized = reportQuery.trim().toLowerCase();
     if (!normalized) return classDetail.reportFormats;
     return classDetail.reportFormats.filter((item) =>
-      item.title.toLowerCase().includes(normalized),
+      item.title.toLowerCase().includes(normalized)
     );
   }, [classDetail, reportQuery]);
 
@@ -85,12 +126,11 @@ const ClassDetailPage: React.FC = () => {
 
   const subjectPageCount = Math.max(
     1,
-    Math.ceil(filteredSubjects.length / subjectPageSize),
+    Math.ceil(filteredSubjects.length / subjectPageSize)
   );
-
   const studentPageCount = Math.max(
     1,
-    Math.ceil(filteredStudents.length / studentPageSize),
+    Math.ceil(filteredStudents.length / studentPageSize)
   );
 
   useEffect(() => {
@@ -105,7 +145,7 @@ const ClassDetailPage: React.FC = () => {
   const subjectOffset = (boundedSubjectPage - 1) * subjectPageSize;
   const visibleSubjects = filteredSubjects.slice(
     subjectOffset,
-    subjectOffset + subjectPageSize,
+    subjectOffset + subjectPageSize
   );
   const isLastSubjectPage = boundedSubjectPage >= subjectPageCount;
 
@@ -113,17 +153,14 @@ const ClassDetailPage: React.FC = () => {
   const studentOffset = (boundedStudentPage - 1) * studentPageSize;
   const visibleStudents = filteredStudents.slice(
     studentOffset,
-    studentOffset + studentPageSize,
+    studentOffset + studentPageSize
   );
   const isLastStudentPage = boundedStudentPage >= studentPageCount;
 
   return (
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
       <div className="flex">
-        <Sidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <div className="flex min-h-screen flex-1 flex-col">
           <Header onToggleSidebar={() => setSidebarOpen((open) => !open)} />
@@ -235,6 +272,7 @@ const ClassDetailPage: React.FC = () => {
               </div>
             </section>
 
+            {/* Tabs */}
             <section className="mt-6 space-y-5">
               <div className="rounded-2xl border border-gray-200 bg-white">
                 <div className="flex flex-wrap gap-4 border-b border-gray-100 px-6 pt-4">
@@ -246,9 +284,7 @@ const ClassDetailPage: React.FC = () => {
                         type="button"
                         onClick={() => setActiveTab(tab)}
                         className={`relative pb-3 text-sm font-semibold transition ${
-                          active
-                            ? "text-[#5b21b6]"
-                            : "text-gray-500 hover:text-[#6c2bd9]"
+                          active ? "text-[#5b21b6]" : "text-gray-500 hover:text-[#6c2bd9]"
                         }`}
                       >
                         {tab}
@@ -261,6 +297,7 @@ const ClassDetailPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-4 px-6 pb-6 pt-5">
+                  {/* Subjects */}
                   {activeTab === "Subjects" && (
                     <div className="space-y-5">
                       <div className="flex flex-col gap-3">
@@ -274,8 +311,8 @@ const ClassDetailPage: React.FC = () => {
                           <input
                             type="search"
                             value={subjectQuery}
-                            onChange={(event) => {
-                              setSubjectQuery(event.target.value);
+                            onChange={(e) => {
+                              setSubjectQuery(e.target.value);
                               setSubjectPage(1);
                             }}
                             placeholder="Search Here"
@@ -288,15 +325,9 @@ const ClassDetailPage: React.FC = () => {
                         <table className="min-w-full divide-y divide-gray-100 text-sm">
                           <thead className="bg-[#f8f8ff] text-[#5b21b6]">
                             <tr>
-                              <th className="px-4 py-3 text-left font-semibold">
-                                Subject Code
-                              </th>
-                              <th className="px-4 py-3 text-left font-semibold">
-                                Subject Name
-                              </th>
-                              <th className="px-4 py-3 text-left font-semibold">
-                                Description
-                              </th>
+                              <th className="px-4 py-3 text-left font-semibold">Subject Code</th>
+                              <th className="px-4 py-3 text-left font-semibold">Subject Name</th>
+                              <th className="px-4 py-3 text-left font-semibold">Description</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-100 bg-white text-gray-700">
@@ -313,10 +344,7 @@ const ClassDetailPage: React.FC = () => {
                             ))}
                             {visibleSubjects.length === 0 && (
                               <tr>
-                                <td
-                                  colSpan={3}
-                                  className="py-12 text-center text-sm text-gray-500"
-                                >
+                                <td colSpan={3} className="py-12 text-center text-sm text-gray-500">
                                   No subjects match your search.
                                 </td>
                               </tr>
@@ -329,8 +357,8 @@ const ClassDetailPage: React.FC = () => {
                             <span>Showing</span>
                             <select
                               value={subjectPageSize}
-                              onChange={(event) => {
-                                setSubjectPageSize(Number(event.target.value));
+                              onChange={(e) => {
+                                setSubjectPageSize(Number(e.target.value));
                                 setSubjectPage(1);
                               }}
                               className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/20"
@@ -363,12 +391,11 @@ const ClassDetailPage: React.FC = () => {
                     </div>
                   )}
 
+                  {/* Students */}
                   {activeTab === "Students" && (
                     <div className="space-y-5">
                       <div className="flex flex-col gap-3">
-                        <h2 className="text-lg font-semibold text-gray-900">
-                          Students List
-                        </h2>
+                        <h2 className="text-lg font-semibold text-gray-900">Students List</h2>
                         <label className="relative block w-full max-w-md">
                           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                             <Search className="h-4 w-4" />
@@ -376,8 +403,8 @@ const ClassDetailPage: React.FC = () => {
                           <input
                             type="search"
                             value={studentQuery}
-                            onChange={(event) => {
-                              setStudentQuery(event.target.value);
+                            onChange={(e) => {
+                              setStudentQuery(e.target.value);
                               setStudentPage(1);
                             }}
                             placeholder="Search Here"
@@ -392,32 +419,27 @@ const ClassDetailPage: React.FC = () => {
                             <tr>
                               <th className="px-4 py-3 text-left font-semibold">
                                 <span className="inline-flex items-center gap-2">
-                                  Student ID
-                                  <ArrowUpDown className="h-3.5 w-3.5" />
+                                  Student ID <ArrowUpDown className="h-3.5 w-3.5" />
                                 </span>
                               </th>
                               <th className="px-4 py-3 text-left font-semibold">
                                 <span className="inline-flex items-center gap-2">
-                                  Student Name
-                                  <ArrowUpDown className="h-3.5 w-3.5" />
+                                  Student Name <ArrowUpDown className="h-3.5 w-3.5" />
                                 </span>
                               </th>
                               <th className="px-4 py-3 text-left font-semibold">
                                 <span className="inline-flex items-center gap-2">
-                                  Student Email
-                                  <ArrowUpDown className="h-3.5 w-3.5" />
+                                  Student Email <ArrowUpDown className="h-3.5 w-3.5" />
                                 </span>
                               </th>
                               <th className="px-4 py-3 text-left font-semibold">
                                 <span className="inline-flex items-center gap-2">
-                                  Current Class
-                                  <ArrowUpDown className="h-3.5 w-3.5" />
+                                  Current Class <ArrowUpDown className="h-3.5 w-3.5" />
                                 </span>
                               </th>
                               <th className="px-4 py-3 text-left font-semibold">
                                 <span className="inline-flex items-center gap-2">
-                                  Current Flag
-                                  <ArrowUpDown className="h-3.5 w-3.5" />
+                                  Current Flag <ArrowUpDown className="h-3.5 w-3.5" />
                                 </span>
                               </th>
                             </tr>
@@ -431,9 +453,7 @@ const ClassDetailPage: React.FC = () => {
                                     {student.id}
                                   </td>
                                   <td className="px-4 py-3">{student.name}</td>
-                                  <td className="px-4 py-3 text-gray-500">
-                                    {emailLabel}
-                                  </td>
+                                  <td className="px-4 py-3 text-gray-500">{emailLabel}</td>
                                   <td className="px-4 py-3">{student.currentClass}</td>
                                   <td className="px-4 py-3">
                                     <span className="inline-flex items-center gap-2">
@@ -449,10 +469,7 @@ const ClassDetailPage: React.FC = () => {
                             })}
                             {visibleStudents.length === 0 && (
                               <tr>
-                                <td
-                                  colSpan={5}
-                                  className="py-12 text-center text-sm text-gray-500"
-                                >
+                                <td colSpan={5} className="py-12 text-center text-sm text-gray-500">
                                   No students match your search.
                                 </td>
                               </tr>
@@ -465,8 +482,8 @@ const ClassDetailPage: React.FC = () => {
                             <span>Showing</span>
                             <select
                               value={studentPageSize}
-                              onChange={(event) => {
-                                setStudentPageSize(Number(event.target.value));
+                              onChange={(e) => {
+                                setStudentPageSize(Number(e.target.value));
                                 setStudentPage(1);
                               }}
                               className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/20"
@@ -499,6 +516,7 @@ const ClassDetailPage: React.FC = () => {
                     </div>
                   )}
 
+                  {/* Student Report Format */}
                   {activeTab === "Student Report Format" && (
                     <div className="space-y-4">
                       <div className="flex flex-col gap-3">
@@ -512,7 +530,7 @@ const ClassDetailPage: React.FC = () => {
                           <input
                             type="search"
                             value={reportQuery}
-                            onChange={(event) => setReportQuery(event.target.value)}
+                            onChange={(e) => setReportQuery(e.target.value)}
                             placeholder="Search Here"
                             className="w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/20"
                           />
@@ -558,13 +576,10 @@ const ClassDetailPage: React.FC = () => {
         msg="class"
         onConfirm={() => {
           setOpenDelete(false);
-          // lakukan aksi delete ke storage/API bila perlu
-          router.back(); // kembali setelah delete
+          router.back();
         }}
         onClose={() => setOpenDelete(false)}
       />
     </div>
   );
-};
-
-export default ClassDetailPage;
+}
