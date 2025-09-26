@@ -14,6 +14,7 @@ import {
 import AddButton from "@/components/layout-global/AddButton";
 import EditAction from "@/components/layout-global/EditAction";
 import ViewAction from "@/components/layout-global/ViewAction";
+import DownloadButton from "@/components/layout-global/DownloadButton";
 
 type StatusFilter = "All" | "Active" | "Non Active";
 
@@ -197,13 +198,7 @@ const AssessmentCategoryPage = () => {
           </label>
         </div>
 
-        <button
-          type="button"
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-[#6c2bd9] transition hover:bg-white"
-        >
-          <Download className="h-4 w-4" />
-          Download Data
-        </button>
+        <DownloadButton label="Download Data" />
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">

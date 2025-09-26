@@ -9,6 +9,7 @@ import ToggleSwitch from "../../../../../../../components/layout-global/ToggleSw
 import SaveChangesModal from "../../../../../../../components/admin/modal/EditModal";
 import { ArrowLeft, GraduationCap, Plus, X } from "lucide-react";
 import { getClassDetailByName, ClassDetailRecord } from "../../../class-data";
+import EditButton from "@/components/layout-global/EditButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -116,7 +117,8 @@ const EditClassPage: React.FC = () => {
     };
     console.log("Saving class data:", updatedData);
     setShowSaveModal(false);
-    router.push(`/admin/master-data/classes/class-detail?name=${formData.name}`);
+    // Redirect to classes page after successful save
+    router.push("/admin/master-data/classes");
   }, [formData, selectedSubjects, selectedReportFormats, router]);
 
   return (
@@ -355,13 +357,10 @@ const EditClassPage: React.FC = () => {
 
                 {/* Save Button */}
                 <div className="flex justify-end pt-4">
-                  <button
-                    type="button"
+                  <EditButton 
                     onClick={handleSave}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#6c2bd9] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#5a23c7] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/30"
-                  >
-                    💾 Save Data
-                  </button>
+                    label="Save Changes"
+                  />
                 </div>
               </div>
             </section>

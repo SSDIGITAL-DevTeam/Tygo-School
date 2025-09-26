@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { getClassList, ClassRecord, CLASS_STATUS_FILTERS } from "./class-data";
 import AddButton from "@/components/layout-global/AddButton";
+import DownloadButton from "@/components/layout-global/DownloadButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -234,13 +235,7 @@ const ClassManagementPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    className="inline-flex flex-nowrap items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span className="whitespace-nowrap">Download Data</span>
-                  </button>
+                  <DownloadButton label="Download Data" />
                 </div>
 
                 <div className="overflow-x-auto rounded-xl border border-gray-100">
