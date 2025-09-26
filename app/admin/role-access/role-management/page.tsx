@@ -29,6 +29,7 @@ const RoleManagementPage: React.FC = () => {
 
         <main className="flex-1">
           <div className="space-y-6 p-4 md:p-6 lg:p-8">
+            {/* === Reusable PageHeader === */}
             <div className="mx-auto max-w-7xl">
               <PageHeader
                 title="Role Management"
@@ -36,6 +37,7 @@ const RoleManagementPage: React.FC = () => {
               />
             </div>
 
+            {/* === Table Role === */}
             <div className="mx-auto max-w-7xl">
               <RoleTable data={roles} />
             </div>
