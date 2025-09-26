@@ -6,35 +6,18 @@ import RoleTable from "../../../../components/admin/RoleTable";
 import PageHeader from "../../../../components/layout-global/PageHeader";
 import { Inter } from "next/font/google";
 import { Shield } from "lucide-react";
+import { ROLE_LIST } from "@/lib/roles";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const buildRoles = () => {
-  const seed = [
-    { name: "Admin", features: 6, status: "Active" as const },
-    { name: "Secondary Admin", features: 4, status: "Active" as const },
-    { name: "Subjects and Teachers Admin", features: 4, status: "Active" as const },
-    { name: "Students Report Admin", features: 5, status: "Active" as const },
-  ];
-  const extras = [
-    "Finance Admin","Library Admin","Lab Admin","Counseling Admin","Dorm Admin","Sports Admin",
-    "Events Admin","Transport Admin","IT Support","Admissions Admin","Attendance Admin",
-    "Curriculum Admin","Schedule Admin","Exams Admin","Alumni Admin","Health Admin",
-    "Cafeteria Admin","Discipline Admin","Security Admin","Communication Admin","Procurement Admin",
-  ];
-  return [
-    ...seed,
-    ...extras.map((name, index) => ({
-      name,
-      features: 3 + (index % 4),
-      status: index % 7 === 0 ? ("Non Active" as const) : ("Active" as const),
-    })),
-  ];
-};
-
 const RoleManagementPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const roles = useMemo(() => buildRoles(), []);
+  const roles = useMemo(() => ROLE_LIST.map((role) => ({
+    id: role.id,
+    name: role.name,
+    features: role.features.length,
+    status: role.status,
+  })), []);
 
   return (
     <div className={`${inter.className} flex min-h-screen`}>
@@ -46,7 +29,6 @@ const RoleManagementPage: React.FC = () => {
 
         <main className="flex-1">
           <div className="space-y-6 p-4 md:p-6 lg:p-8">
-            {/* === Reusable PageHeader === */}
             <div className="mx-auto max-w-7xl">
               <PageHeader
                 title="Role Management"
@@ -54,7 +36,6 @@ const RoleManagementPage: React.FC = () => {
               />
             </div>
 
-            {/* === Table Role === */}
             <div className="mx-auto max-w-7xl">
               <RoleTable data={roles} />
             </div>
