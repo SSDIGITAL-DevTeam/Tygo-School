@@ -25,6 +25,8 @@ import {
 
 import { getTeacherList, TeacherRecord } from "./teacher-data";
 import DownloadButton from "@/components/layout-global/DownloadButton";
+import StatusFilter from "@/components/layout-global/StatusFilter";
+import SearchInput from "@/components/layout-global/SearchInput";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -230,77 +232,25 @@ const TeacherManagementPage: React.FC = () => {
                   {/* LEFT: Filter + Search */}
                   <div className="flex w-full items-center gap-3 xl:w-auto">
                     {/* Filter */}
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setShowFilter((o) => !o)}
-                        className={`inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-                          showFilter || statusFilter !== "All"
-                            ? "border-[#6c2bd9] bg-purple-50 text-[#6c2bd9]"
-                            : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                        }`}
-                        aria-expanded={showFilter}
-                      >
-                        <Filter className="h-4 w-4" />
-                        Filter
-                        {statusFilter !== "All" && (
-                          <span className="ml-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[#6c2bd9] px-1 text-xs font-semibold text-white">
-                            1
-                          </span>
-                        )}
-                      </button>
-
-                      {showFilter && (
-                        <div className="absolute z-10 mt-2 w-52 rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
-                          <div className="mb-2 flex items-center justify-between text-sm font-semibold text-gray-700">
-                            <span>Status</span>
-                            <button
-                              type="button"
-                              aria-label="Close filter"
-                              className="rounded-md p-1 text-gray-500 hover:bg-gray-100"
-                              onClick={() => setShowFilter(false)}
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                          <ul className="space-y-1 text-sm text-gray-600">
-                            {["All", "Active", "Non Active"].map((option) => (
-                              <li key={option}>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    applyStatusFilter(
-                                      option as typeof statusFilter
-                                    )
-                                  }
-                                  className={`w-full rounded-md px-3 py-2 text-left transition-colors ${
-                                    statusFilter === option
-                                      ? "bg-purple-100 font-semibold text-[#6c2bd9]"
-                                      : "hover:bg-gray-100"
-                                  }`}
-                                >
-                                  {option === "All" ? "All Status" : option}
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Search */}
-                    <div className="relative w-full xl:max-w-sm">
-                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="search"
-                        value={query}
-                        onChange={(e) => {
-                          setQuery(e.target.value);
-                          setPage(1);
-                        }}
-                        placeholder="Search Here"
-                        className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/40"
-                      />
+                    <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+                        <StatusFilter
+                          value={statusFilter}
+                          onChange={(v) => {
+                            setStatusFilter(v);
+                            setPage(1);
+                          }}
+                        // options default: ["All", "Active", "Non Active"]
+                        />
+                        <SearchInput
+                          value={query}
+                          onChange={(val) => {
+                            setQuery(val);
+                            setPage(1);
+                          }}
+                          placeholder="Search Here"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -418,12 +368,6 @@ const TeacherManagementPage: React.FC = () => {
                       pageCount={pageCount}
                       onPageChange={setPage}
                     />
-                    <button
-                      type="button"
-                      className="rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-[#6c2bd9] transition-colors hover:bg-purple-50"
-                    >
-                      Go &gt;&gt;
-                    </button>
                   </div>
                 </div>
               </div>

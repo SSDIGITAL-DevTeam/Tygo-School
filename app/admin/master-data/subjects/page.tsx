@@ -29,6 +29,8 @@ import AddButton from "@/components/layout-global/AddButton";
 import EditAction from "@/components/layout-global/EditAction";
 import ViewAction from "@/components/layout-global/ViewAction";
 import DownloadButton from "@/components/layout-global/DownloadButton";
+import StatusFilter from "@/components/layout-global/StatusFilter";
+import SearchInput from "@/components/layout-global/SearchInput";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -133,9 +135,9 @@ const SubjectManagementPage: React.FC = () => {
     },
     []
   );
-  
 
-    const SUBJECTS_BASE = "/admin/master-data/subjects";
+
+  const SUBJECTS_BASE = "/admin/master-data/subjects";
 
   return (
     <div className={`min-h-screen bg-[#f5f6fa] ${inter.className}`}>
@@ -182,50 +184,26 @@ const SubjectManagementPage: React.FC = () => {
 
                 {/* Baris Filter + Search (kiri) dan Download (kanan) */}
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center">
+                  <div className="flex w-full flex-col lg:flex-row lg:items-center">
                     {/* Filter */}
-                    <div className="relative w-full max-w-[140px]">
-                      {/* ...blok filter kamu tetap... */}
-                    </div>
-
-                    {/* Search seperti di gambar: tinggi konsisten & lebar tetap */}
-                    <div className="flex-1">
-                      <label htmlFor="subject-search" className="sr-only">
-                        Search subjects
-                      </label>
-                      <div
-                        className="group relative flex h-11 items-center w-full max-w-[420px]
-                          rounded-lg border border-gray-300 bg-white pl-3 pr-2 shadow-sm transition
-                          focus-within:border-[#6c2bd9] focus-within:ring-2 focus-within:ring-[#6c2bd9]/30"
-                      >
-                        <Search
-                          className="h-4 w-4 text-gray-400"
-                          aria-hidden="true"
+                    <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+                        <StatusFilter
+                          value={statusFilter}
+                          onChange={(v) => {
+                            setStatusFilter(v);
+                            setPage(1);
+                          }}
+                        // options default: ["All", "Active", "Non Active"]
                         />
-                        <input
-                          id="subject-search"
-                          type="search"
+                        <SearchInput
                           value={query}
-                          onChange={(e) => {
-                            setQuery(e.target.value);
+                          onChange={(val) => {
+                            setQuery(val);
                             setPage(1);
                           }}
                           placeholder="Search Here"
-                          className="w-full bg-transparent px-3 text-sm text-gray-700 placeholder:text-gray-400 outline-none"
                         />
-                        {query && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setQuery("");
-                              setPage(1);
-                            }}
-                            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                            aria-label="Clear search"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        )}
                       </div>
                     </div>
                   </div>

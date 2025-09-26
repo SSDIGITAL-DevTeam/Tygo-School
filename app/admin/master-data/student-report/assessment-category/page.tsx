@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿"use client";
+﻿﻿﻿﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,7 @@ import AddButton from "@/components/layout-global/AddButton";
 import EditAction from "@/components/layout-global/EditAction";
 import ViewAction from "@/components/layout-global/ViewAction";
 import DownloadButton from "@/components/layout-global/DownloadButton";
+import Pagination from "@/components/layout-global/Pagination";
 
 type StatusFilter = "All" | "Active" | "Non Active";
 
@@ -239,8 +240,8 @@ const AssessmentCategoryPage = () => {
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-2">
                       <EditAction
-                        href={`${REPORT_BASE}/detail-category/${encodeURIComponent(row.id)}/edit`}
-                        title={`Edit ${row.name}`}
+                        href={`${REPORT_BASE}/${encodeURIComponent(row.id)}/edit`}
+                        title={`Edit ${row.id}`}
                       />
 
                       {/* View -> detail-category page */}
@@ -283,60 +284,11 @@ const AssessmentCategoryPage = () => {
                 <span>from {totalCount} data</span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPage(1)}
-                  disabled={page === 1}
-                  className="rounded-md border border-gray-200 px-2 py-1 text-sm disabled:opacity-50"
-                  aria-label="First page"
-                >
-                  {"<<"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
-                  disabled={page === 1}
-                  className="rounded-md border border-gray-200 px-2 py-1 text-sm disabled:opacity-50"
-                  aria-label="Previous page"
-                >
-                  {"<"}
-                </button>
-
-                {pageWindow.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setPage(p)}
-                    className={`rounded-md border px-3 py-1.5 text-sm transition ${p === page
-                      ? "bg-[#6c2bd9] text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-50"
-                      }`}
-                    aria-current={p === page ? "page" : undefined}
-                  >
-                    {p}
-                  </button>
-                ))}
-
-                <button
-                  type="button"
-                  onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
-                  disabled={page === pageCount}
-                  className="rounded-md border border-gray-200 px-2 py-1 text-sm disabled:opacity-50"
-                  aria-label="Next page"
-                >
-                  {">"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPage(pageCount)}
-                  disabled={page === pageCount}
-                  className="rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-[#6c2bd9] transition hover:bg-purple-50 disabled:opacity-50"
-                  aria-label="Last page"
-                >
-                  Go {">>"}
-                </button>
-              </div>
+              <Pagination
+                page={page}
+                pageCount={pageCount}
+                onPageChange={setPage}
+              />
             </div>
           </div>
         </div>

@@ -25,6 +25,8 @@ import {
 import { getClassList, ClassRecord, CLASS_STATUS_FILTERS } from "./class-data";
 import AddButton from "@/components/layout-global/AddButton";
 import DownloadButton from "@/components/layout-global/DownloadButton";
+import StatusFilter from "@/components/layout-global/StatusFilter";
+import SearchInput from "@/components/layout-global/SearchInput";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -219,19 +221,25 @@ const ClassManagementPage: React.FC = () => {
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center">
                     {/* ...blok filter kamu tetap... */}
-                    <div className="relative w-full md:w-80">
-                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="search"
-                        value={query}
-                        onChange={(e) => {
-                          setQuery(e.target.value);
-                          setPage(1);
-                        }}
-                        placeholder="Search here"
-                        className="w-full rounded-md border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 shadow-sm focus:border-[#6c2bd9] focus:outline-none focus:ring-2 focus:ring-[#6c2bd9]/20"
-                        aria-label="Search classes"
-                      />
+                    <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+                        <StatusFilter
+                          value={statusFilter}
+                          onChange={(v) => {
+                            setStatusFilter(v);
+                            setPage(1);
+                          }}
+                        // options default: ["All", "Active", "Non Active"]
+                        />
+                        <SearchInput
+                          value={query}
+                          onChange={(val) => {
+                            setQuery(val);
+                            setPage(1);
+                          }}
+                          placeholder="Search Here"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -381,12 +389,6 @@ const ClassManagementPage: React.FC = () => {
                       pageCount={pageCount}
                       onPageChange={setPage}
                     />
-                    <button
-                      type="button"
-                      className="rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-[#6c2bd9] transition hover:bg-purple-50"
-                    >
-                      Go {">>"}
-                    </button>
                   </div>
                 </div>
               </div>
