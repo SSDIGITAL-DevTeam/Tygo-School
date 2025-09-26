@@ -341,12 +341,6 @@ const SubjectManagementPage: React.FC = () => {
                       pageCount={pageCount}
                       onPageChange={setPage}
                     />
-                    <button
-                      type="button"
-                      className="rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-[#6c2bd9] transition hover:bg-purple-50"
-                    >
-                      Go {">>"}
-                    </button>
                   </div>
                 </div>
               </div>
