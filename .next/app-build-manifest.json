@@ -6,27 +6,15 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/role-access/admin-list/[id]/edit/page": [
+    "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/role-access/admin-list/[id]/edit/page.css",
-      "static/chunks/app/role-access/admin-list/[id]/edit/page.js"
+      "static/chunks/app/page.js"
     ],
-    "/api/admins/[id]/route": [
+    "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/admins/[id]/route.js"
-    ],
-    "/role-access/admin-list/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/role-access/admin-list/page.css",
-      "static/chunks/app/role-access/admin-list/page.js"
-    ],
-    "/students/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/students/page.js"
+      "static/chunks/app/_not-found/page.js"
     ]
   }
 }

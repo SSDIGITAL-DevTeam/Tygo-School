@@ -16,6 +16,10 @@
         "@supabase/ssr": "^0.7.0",
         "@supabase/supabase-js": "^2.57.4",
         "@upstash/redis": "^1.35.4",
+<<<<<<< HEAD
+=======
+        "clsx": "^2.1.1",
+>>>>>>> 32ba9d13ef15255af8df84055de8ed8720e35277
         "jose": "^6.1.0",
         "lucide-react": "^0.544.0",
         "next": "^15.5.3",
